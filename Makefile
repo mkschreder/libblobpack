@@ -1,10 +1,10 @@
-all: libblob.a libblob.so
+all: libblob.a libblob.so simple-example
 
 SOURCE:=$(wildcard *.c)
 HEADERS:=$(wildcard *.h)
 OBJECTS:=$(patsubst %.c,%.o,$(SOURCE))
 LDFLAGS+=-ljson-c
-CFLAGS+=-fPIC
+CFLAGS+=-g -std=gnu99 -fPIC
 
 libblob.a: $(OBJECTS)
 	$(AR) rcs -o $@ $^ 
@@ -15,5 +15,8 @@ libblob.so: $(OBJECTS)
 %.o: %.c 
 	$(CC) $(CFLAGS) -c -o $@ $^
 
+simple-example: examples/simple.c libblob.a
+	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblob -ljson-c
+
 clean: 
-	rm -f *.o
+	rm -f *.o *.a *.so

@@ -232,7 +232,7 @@ static void blobmsg_format_element(struct strbuf *s, struct blob_attr *attr, boo
 	}
 
 	data_str = buf;
-	switch(blob_id(attr)) {
+	switch(blob_attr_id(attr)) {
 	case BLOBMSG_TYPE_UNSPEC:
 		sprintf(buf, "null");
 		break;
@@ -272,7 +272,7 @@ static void blobmsg_format_json_list(struct strbuf *s, struct blob_attr *attr, i
 	blobmsg_puts(s, (array ? "[" : "{" ), 1);
 	s->indent_level++;
 	add_separator(s);
-	__blob_for_each_attr(pos, attr, rem) {
+	__blob_buf_for_each_attr(pos, attr, rem) {
 		if (!first) {
 			blobmsg_puts(s, ",", 1);
 			add_separator(s);
@@ -291,7 +291,7 @@ char *blobmsg_format_json_with_cb(struct blob_attr *attr, bool list, blobmsg_jso
 	struct strbuf s;
 	bool array;
 
-	s.len = blob_len(attr);
+	s.len = blob_attr_len(attr);
 	s.buf = malloc(s.len);
 	s.pos = 0;
 	s.custom_format = cb;
@@ -303,7 +303,7 @@ char *blobmsg_format_json_with_cb(struct blob_attr *attr, bool list, blobmsg_jso
 		s.indent_level = indent;
 	}
 
-	array = blob_is_extended(attr) &&
+	array = blob_attr_is_extended(attr) &&
 		blobmsg_type(attr) == BLOBMSG_TYPE_ARRAY;
 
 	if (list)

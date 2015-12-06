@@ -53,27 +53,27 @@ static inline int blobmsg_hdrlen(unsigned int namelen)
 
 static inline void blobmsg_clear_name(struct blob_attr *attr)
 {
-	struct blobmsg_hdr *hdr = (struct blobmsg_hdr *) blob_data(attr);
+	struct blobmsg_hdr *hdr = (struct blobmsg_hdr *) blob_attr_data(attr);
 	hdr->name[0] = 0;
 }
 
 static inline const char *blobmsg_name(const struct blob_attr *attr)
 {
-	struct blobmsg_hdr *hdr = (struct blobmsg_hdr *) blob_data(attr);
+	struct blobmsg_hdr *hdr = (struct blobmsg_hdr *) blob_attr_data(attr);
 	return (const char *) hdr->name;
 }
 
 static inline int blobmsg_type(const struct blob_attr *attr)
 {
-	return blob_id(attr);
+	return blob_attr_id(attr);
 }
 
 static inline void *blobmsg_data(const struct blob_attr *attr)
 {
-	struct blobmsg_hdr *hdr = (struct blobmsg_hdr *) blob_data(attr);
-	char *data = (char *) blob_data(attr);
+	struct blobmsg_hdr *hdr = (struct blobmsg_hdr *) blob_attr_data(attr);
+	char *data = (char *) blob_attr_data(attr);
 
-	if (blob_is_extended(attr))
+	if (blob_attr_is_extended(attr))
 		data += blobmsg_hdrlen(be16_to_cpu(hdr->namelen));
 
 	return data;
@@ -83,10 +83,10 @@ static inline int blobmsg_data_len(const struct blob_attr *attr)
 {
 	uint8_t *start, *end;
 
-	start = (uint8_t *) blob_data(attr);
+	start = (uint8_t *) blob_attr_data(attr);
 	end = (uint8_t *) blobmsg_data(attr);
 
-	return blob_len(attr) - (end - start);
+	return blob_attr_len(attr) - (end - start);
 }
 
 static inline int blobmsg_len(const struct blob_attr *attr)
@@ -170,18 +170,18 @@ blobmsg_open_table(struct blob_buf *buf, const char *name)
 static inline void
 blobmsg_close_array(struct blob_buf *buf, void *cookie)
 {
-	blob_nest_end(buf, cookie);
+	blob_buf_nest_end(buf, cookie);
 }
 
 static inline void
 blobmsg_close_table(struct blob_buf *buf, void *cookie)
 {
-	blob_nest_end(buf, cookie);
+	blob_buf_nest_end(buf, cookie);
 }
 
-static inline int blobmsg_buf_init(struct blob_buf *buf)
+static inline int blobmsg_init(struct blob_buf *buf)
 {
-	return blob_buf_init(buf, BLOBMSG_TYPE_TABLE);
+	return blob_buf_reinit(buf, BLOBMSG_TYPE_TABLE);
 }
 
 static inline uint8_t blobmsg_get_u8(struct blob_attr *attr)
@@ -234,8 +234,8 @@ void blobmsg_printf(struct blob_buf *buf, const char *name, const char *format, 
 #define blobmsg_for_each_attr(pos, attr, rem) \
 	for (rem = attr ? blobmsg_data_len(attr) : 0, \
 	     pos = attr ? blobmsg_data(attr) : 0; \
-	     rem > 0 && (blob_pad_len(pos) <= rem) && \
-	     (blob_pad_len(pos) >= sizeof(struct blob_attr)); \
-	     rem -= blob_pad_len(pos), pos = blob_next(pos))
+	     rem > 0 && (blob_attr_pad_len(pos) <= rem) && \
+	     (blob_attr_pad_len(pos) >= sizeof(struct blob_attr)); \
+	     rem -= blob_attr_pad_len(pos), pos = blob_attr_next(pos))
 
 #endif

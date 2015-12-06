@@ -36,20 +36,20 @@ bool blobmsg_check_attr(const struct blob_attr *attr, bool name)
 	const char *data;
 	int id, len;
 
-	if (blob_len(attr) < sizeof(struct blobmsg_hdr))
+	if (blob_attr_len(attr) < sizeof(struct blobmsg_hdr))
 		return false;
 
 	hdr = (void *) attr->data;
 	if (!hdr->namelen && name)
 		return false;
 
-	if (blobmsg_namelen(hdr) > blob_len(attr) - sizeof(struct blobmsg_hdr))
+	if (blobmsg_namelen(hdr) > blob_attr_len(attr) - sizeof(struct blobmsg_hdr))
 		return false;
 
 	if (hdr->name[blobmsg_namelen(hdr)] != 0)
 		return false;
 
-	id = blob_id(attr);
+	id = blob_attr_id(attr);
 	len = blobmsg_data_len(attr);
 	data = blobmsg_data(attr);
 
@@ -59,7 +59,7 @@ bool blobmsg_check_attr(const struct blob_attr *attr, bool name)
 	if (!blob_type[id])
 		return true;
 
-	return blob_check_type(data, len, blob_type[id]);
+	return blob_attr_check_type(data, len, blob_type[id]);
 }
 
 int blobmsg_check_array(const struct blob_attr *attr, int type)
@@ -105,9 +105,9 @@ int blobmsg_parse_array(const struct blobmsg_policy *policy, int policy_len,
 	int i = 0;
 
 	memset(tb, 0, policy_len * sizeof(*tb));
-	__blob_for_each_attr(attr, data, len) {
+	__blob_buf_for_each_attr(attr, data, len) {
 		if (policy[i].type != BLOBMSG_TYPE_UNSPEC &&
-		    blob_id(attr) != policy[i].type)
+		    blob_attr_id(attr) != policy[i].type)
 			continue;
 
 		if (!blobmsg_check_attr(attr, false))
@@ -142,14 +142,14 @@ int blobmsg_parse(const struct blobmsg_policy *policy, int policy_len,
 		pslen[i] = strlen(policy[i].name);
 	}
 
-	__blob_for_each_attr(attr, data, len) {
-		hdr = blob_data(attr);
+	__blob_buf_for_each_attr(attr, data, len) {
+		hdr = blob_attr_data(attr);
 		for (i = 0; i < policy_len; i++) {
 			if (!policy[i].name)
 				continue;
 
 			if (policy[i].type != BLOBMSG_TYPE_UNSPEC &&
-			    blob_id(attr) != policy[i].type)
+			    blob_attr_id(attr) != policy[i].type)
 				continue;
 
 			if (blobmsg_namelen(hdr) != pslen[i])
@@ -185,12 +185,12 @@ blobmsg_new(struct blob_buf *buf, int type, const char *name, int payload_len, v
 
 	namelen = strlen(name);
 	attrlen = blobmsg_hdrlen(namelen) + payload_len;
-	attr = blob_new(buf, type, attrlen);
+	attr = blob_buf_new_attr(buf, type, attrlen);
 	if (!attr)
 		return NULL;
 
 	attr->id_len |= be32_to_cpu(BLOB_ATTR_EXTENDED);
-	hdr = blob_data(attr);
+	hdr = blob_attr_data(attr);
 	hdr->namelen = cpu_to_be16(namelen);
 	strcpy((char *) hdr->name, (const char *)name);
 	pad_end = *data = blobmsg_data(attr);
@@ -222,7 +222,7 @@ blobmsg_open_nested(struct blob_buf *buf, const char *name, bool array)
 	head = blobmsg_new(buf, type, name, 0, &data);
 	if (!head)
 		return NULL;
-	blob_set_raw_len(buf->head, blob_pad_len(buf->head) - blobmsg_hdrlen(strlen(name)));
+	blob_attr_set_raw_len(buf->head, blob_attr_pad_len(buf->head) - blobmsg_hdrlen(strlen(name)));
 	buf->head = head;
 	return (void *)offset;
 }
@@ -262,8 +262,8 @@ blobmsg_alloc_string_buffer(struct blob_buf *buf, const char *name, unsigned int
 	if (!attr)
 		return NULL;
 
-	blob_set_raw_len(buf->head, blob_pad_len(buf->head) - blob_pad_len(attr));
-	blob_set_raw_len(attr, blob_raw_len(attr) - maxlen);
+	blob_attr_set_raw_len(buf->head, blob_attr_pad_len(buf->head) - blob_attr_pad_len(attr));
+	blob_attr_set_raw_len(attr, blob_attr_raw_len(attr) - maxlen);
 
 	return data_dest;
 }
@@ -271,15 +271,15 @@ blobmsg_alloc_string_buffer(struct blob_buf *buf, const char *name, unsigned int
 void *
 blobmsg_realloc_string_buffer(struct blob_buf *buf, unsigned int maxlen)
 {
-	struct blob_attr *attr = blob_next(buf->head);
-	int offset = attr_to_offset(buf, blob_next(buf->head)) + blob_pad_len(attr) - BLOB_COOKIE;
+	struct blob_attr *attr = blob_attr_next(buf->head);
+	int offset = attr_to_offset(buf, blob_attr_next(buf->head)) + blob_attr_pad_len(attr) - BLOB_COOKIE;
 	int required = maxlen - (buf->buflen - offset);
 
 	if (required <= 0)
 		goto out;
 
 	blob_buf_grow(buf, required);
-	attr = blob_next(buf->head);
+	attr = blob_attr_next(buf->head);
 
 out:
 	return blobmsg_data(attr);
@@ -291,14 +291,14 @@ blobmsg_add_string_buffer(struct blob_buf *buf)
 	struct blob_attr *attr;
 	int len, attrlen;
 
-	attr = blob_next(buf->head);
+	attr = blob_attr_next(buf->head);
 	len = strlen(blobmsg_data(attr)) + 1;
 
-	attrlen = blob_raw_len(attr) + len;
-	blob_set_raw_len(attr, attrlen);
-	blob_fill_pad(attr);
+	attrlen = blob_attr_raw_len(attr) + len;
+	blob_attr_set_raw_len(attr, attrlen);
+	blob_attr_fill_pad(attr);
 
-	blob_set_raw_len(buf->head, blob_raw_len(buf->head) + blob_pad_len(attr));
+	blob_attr_set_raw_len(buf->head, blob_attr_raw_len(buf->head) + blob_attr_pad_len(attr));
 }
 
 int

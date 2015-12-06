@@ -39,6 +39,8 @@ enum {
 	BLOB_ATTR_INT16,
 	BLOB_ATTR_INT32,
 	BLOB_ATTR_INT64,
+	BLOB_ATTR_FLOAT32, 
+	BLOB_ATTR_FLOAT64,
 	BLOB_ATTR_LAST
 };
 
@@ -179,6 +181,9 @@ blob_attr_get_string(const struct blob_attr *attr)
 	return attr->data;
 }
 
+float blob_attr_get_float(const struct blob_attr *attr); 
+double blob_attr_get_double(const struct blob_attr *attr); 
+
 static inline struct blob_attr *
 blob_attr_next(const struct blob_attr *attr)
 {
@@ -234,6 +239,17 @@ blob_buf_put_u64(struct blob_buf *buf, int id, uint64_t val)
 	val = cpu_to_be64(val);
 	return blob_buf_put(buf, id, &val, sizeof(val));
 }
+
+#define pack754_32(f) (pack754((f), 32, 8))
+#define pack754_64(f) (pack754((f), 64, 11))
+#define unpack754_32(i) (unpack754((i), 32, 8))
+#define unpack754_64(i) (unpack754((i), 64, 11))
+
+uint64_t pack754(long double f, unsigned bits, unsigned expbits); 
+long double unpack754(uint64_t i, unsigned bits, unsigned expbits); 
+
+struct blob_attr *blob_buf_put_float(struct blob_buf *buf, int id, float value); 
+struct blob_attr *blob_buf_put_double(struct blob_buf *buf, int id, double value); 
 
 #define blob_buf_put_int8	blob_buf_put_u8
 #define blob_buf_put_int16	blob_buf_put_u16

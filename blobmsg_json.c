@@ -248,6 +248,12 @@ static void blobmsg_format_element(struct strbuf *s, struct blob_attr *attr, boo
 	case BLOBMSG_TYPE_INT64:
 		sprintf(buf, "%" PRId64, (int64_t) be64_to_cpu(*(uint64_t *)data));
 		break;
+	case BLOBMSG_TYPE_FLOAT32: 
+		sprintf(buf, "%f", (float) unpack754_32(be32_to_cpu(*(uint32_t*)data))); 
+		break; 
+	case BLOBMSG_TYPE_FLOAT64: 
+		sprintf(buf, "%Le", unpack754_64(be64_to_cpu(*(uint64_t*)data))); 
+		break; 
 	case BLOBMSG_TYPE_STRING:
 		blobmsg_format_string(s, data);
 		return;

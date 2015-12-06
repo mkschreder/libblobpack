@@ -48,6 +48,12 @@ static void dump_attr_data(struct blob_attr *data, int indent, int next_indent)
 	case BLOBMSG_TYPE_INT64:
 		indent_printf(indent, "%"PRIu64"\n", blobmsg_get_u64(data));
 		break;
+	case BLOBMSG_TYPE_FLOAT32: 
+		indent_printf(indent, "%f\n", blobmsg_get_f32(data)); 
+		break; 
+	case BLOBMSG_TYPE_FLOAT64: 
+		indent_printf(indent, "%Le\n", blobmsg_get_f64(data)); 
+		break; 
 	case BLOBMSG_TYPE_TABLE:
 	case BLOBMSG_TYPE_ARRAY:
 		if (!indent)
@@ -120,7 +126,8 @@ fill_message(struct blob_buf *buf)
 	blobmsg_add_u32(buf, NULL, 0);
 	blobmsg_add_u32(buf, NULL, 1);
 	blobmsg_add_u32(buf, NULL, 2);
-	blobmsg_close_table(buf, tbl);
+	blobmsg_add_f32(buf, NULL, 0.123);
+	blobmsg_close_array(buf, tbl);
 }
 
 int main(int argc, char **argv)

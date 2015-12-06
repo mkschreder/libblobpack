@@ -31,6 +31,8 @@ enum blobmsg_type {
 	BLOBMSG_TYPE_INT32,
 	BLOBMSG_TYPE_INT16,
 	BLOBMSG_TYPE_INT8,
+	BLOBMSG_TYPE_FLOAT32, 
+	BLOBMSG_TYPE_FLOAT64,
 	__BLOBMSG_TYPE_LAST,
 	BLOBMSG_TYPE_LAST = __BLOBMSG_TYPE_LAST - 1,
 	BLOBMSG_TYPE_BOOL = BLOBMSG_TYPE_INT8,
@@ -147,6 +149,20 @@ blobmsg_add_u64(struct blob_buf *buf, const char *name, uint64_t val)
 }
 
 static inline int
+blobmsg_add_f32(struct blob_buf *buf, const char *name, float value)
+{
+	uint32_t val = cpu_to_be32(pack754_32(value));
+	return blobmsg_add_field(buf, BLOBMSG_TYPE_FLOAT32, name, &val, 4);
+}
+
+static inline int
+blobmsg_add_f64(struct blob_buf *buf, const char *name, double value)
+{
+	uint64_t val = cpu_to_be64(pack754_64(value));
+	return blobmsg_add_field(buf, BLOBMSG_TYPE_FLOAT64, name, &val, 8);
+}
+
+static inline int
 blobmsg_add_string(struct blob_buf *buf, const char *name, const char *string)
 {
 	return blobmsg_add_field(buf, BLOBMSG_TYPE_STRING, name, string, strlen(string) + 1);
@@ -222,6 +238,22 @@ static inline uint64_t blobmsg_get_u64(struct blob_attr *attr)
 	tmp |= be32_to_cpu(ptr[1]);
 	return tmp;
 }
+
+static inline float blobmsg_get_f32(struct blob_attr *attr)
+{
+	if(!attr) return 0; 
+	return unpack754_32(be32_to_cpu(*(uint32_t *) blobmsg_data(attr)));
+}
+
+static inline long double blobmsg_get_f64(struct blob_attr *attr)
+{
+	if(!attr) return 0; 
+	uint32_t *ptr = (uint32_t *) blobmsg_data(attr);
+	uint64_t tmp = ((uint64_t) be32_to_cpu(ptr[0])) << 32;
+	tmp |= be32_to_cpu(ptr[1]);
+	return unpack754_64(tmp);
+}
+
 
 static inline char *blobmsg_get_string(struct blob_attr *attr)
 {

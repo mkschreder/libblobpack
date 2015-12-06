@@ -75,8 +75,9 @@ _blob_buf_add(struct blob_buf *buf, struct blob_attr *pos, int id, int payload)
 }
 
 int blob_buf_reinit(struct blob_buf *buf, int type){
-	buf->buf = buf->head; 
-
+	buf->head = buf->buf; 
+	blob_attr_init(buf->head, type, sizeof(struct blob_attr));
+	blob_attr_fill_pad(buf->head); 
 	return 0;
 }
 
@@ -92,9 +93,7 @@ int blob_buf_init(struct blob_buf *buf, const char *data, size_t size){
 		buf->head = buf->buf; 
 	} else {
 		memset(buf->buf, 0, buf->buflen); 
-		buf->head = buf->buf; 
-		blob_attr_init(buf->head, 0, sizeof(struct blob_attr)); 
-		blob_attr_fill_pad(buf->head); 
+		blob_buf_reinit(buf, 0); 
 	}
 	return 0; 
 }

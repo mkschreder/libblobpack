@@ -1,4 +1,4 @@
-all: libblobpack.a libblobpack.so simple-example
+all: libblobpack.a libblobpack.so simple-example random-test
 
 SOURCE:=$(wildcard *.c)
 HEADERS:=$(wildcard *.h)
@@ -15,8 +15,11 @@ libblobpack.so: $(OBJECTS)
 %.o: %.c 
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-simple-example: examples/simple.c libblob.a
-	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblob -ljson-c
+simple-example: examples/simple.c libblobpack.a
+	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblobpack -ljson-c
+
+random-test: tests/random.c libblobpack.a
+	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblobpack -ljson-c
 
 clean: 
-	rm -f *.o *.a *.so
+	rm -f *.o *.a *.so *-example *-test

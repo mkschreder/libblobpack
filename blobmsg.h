@@ -53,23 +53,27 @@ static inline int blobmsg_hdrlen(unsigned int namelen)
 
 static inline void blobmsg_clear_name(struct blob_attr *attr)
 {
+	if(!attr) return; 
 	struct blobmsg_hdr *hdr = (struct blobmsg_hdr *) blob_attr_data(attr);
 	hdr->name[0] = 0;
 }
 
 static inline const char *blobmsg_name(const struct blob_attr *attr)
 {
+	if(!attr) return 0; 
 	struct blobmsg_hdr *hdr = (struct blobmsg_hdr *) blob_attr_data(attr);
 	return (const char *) hdr->name;
 }
 
 static inline int blobmsg_type(const struct blob_attr *attr)
 {
+	if(!attr) return -1; 
 	return blob_attr_id(attr);
 }
 
-static inline void *blobmsg_data(const struct blob_attr *attr)
-{
+static inline void *blobmsg_data(const struct blob_attr *attr){
+	if(!attr) return 0; 
+
 	struct blobmsg_hdr *hdr = (struct blobmsg_hdr *) blob_attr_data(attr);
 	char *data = (char *) blob_attr_data(attr);
 
@@ -81,6 +85,7 @@ static inline void *blobmsg_data(const struct blob_attr *attr)
 
 static inline int blobmsg_data_len(const struct blob_attr *attr)
 {
+	if(!attr) return 0; 
 	uint8_t *start, *end;
 
 	start = (uint8_t *) blob_attr_data(attr);
@@ -91,6 +96,7 @@ static inline int blobmsg_data_len(const struct blob_attr *attr)
 
 static inline int blobmsg_len(const struct blob_attr *attr)
 {
+	if(!attr) return 0;  
 	return blobmsg_data_len(attr);
 }
 
@@ -186,26 +192,31 @@ static inline int blobmsg_init(struct blob_buf *buf)
 
 static inline uint8_t blobmsg_get_u8(struct blob_attr *attr)
 {
+	if(!attr) return 0; 
 	return *(uint8_t *) blobmsg_data(attr);
 }
 
 static inline bool blobmsg_get_bool(struct blob_attr *attr)
 {
+	if(!attr) return 0; 
 	return *(uint8_t *) blobmsg_data(attr);
 }
 
 static inline uint16_t blobmsg_get_u16(struct blob_attr *attr)
 {
+	if(!attr) return 0; 
 	return be16_to_cpu(*(uint16_t *) blobmsg_data(attr));
 }
 
 static inline uint32_t blobmsg_get_u32(struct blob_attr *attr)
 {
+	if(!attr) return 0; 
 	return be32_to_cpu(*(uint32_t *) blobmsg_data(attr));
 }
 
 static inline uint64_t blobmsg_get_u64(struct blob_attr *attr)
 {
+	if(!attr) return 0; 
 	uint32_t *ptr = (uint32_t *) blobmsg_data(attr);
 	uint64_t tmp = ((uint64_t) be32_to_cpu(ptr[0])) << 32;
 	tmp |= be32_to_cpu(ptr[1]);
@@ -214,8 +225,7 @@ static inline uint64_t blobmsg_get_u64(struct blob_attr *attr)
 
 static inline char *blobmsg_get_string(struct blob_attr *attr)
 {
-	if (!attr)
-		return NULL;
+	if (!attr) return 0; 
 
 	return (char *) blobmsg_data(attr);
 }

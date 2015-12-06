@@ -204,7 +204,7 @@ blobmsg_new(struct blob_buf *buf, int type, const char *name, int payload_len, v
 static inline int
 attr_to_offset(struct blob_buf *buf, struct blob_attr *attr)
 {
-	return (char *)attr - (char *) buf->buf + BLOB_COOKIE;
+	return (char *)attr - (char *) buf->buf;
 }
 
 
@@ -272,7 +272,7 @@ void *
 blobmsg_realloc_string_buffer(struct blob_buf *buf, unsigned int maxlen)
 {
 	struct blob_attr *attr = blob_attr_next(buf->head);
-	int offset = attr_to_offset(buf, blob_attr_next(buf->head)) + blob_attr_pad_len(attr) - BLOB_COOKIE;
+	int offset = attr_to_offset(buf, blob_attr_next(buf->head)) + blob_attr_pad_len(attr);
 	int required = maxlen - (buf->buflen - offset);
 
 	if (required <= 0)

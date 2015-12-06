@@ -28,7 +28,7 @@
 
 #include "utils.h"
 
-#define BLOB_COOKIE		0x01234567
+//#define BLOB_COOKIE		0x01234567
 
 enum {
 	BLOB_ATTR_UNSPEC,
@@ -61,10 +61,9 @@ struct blob_attr_info {
 };
 
 struct blob_buf {
-	struct blob_attr *head;
-	bool (*grow)(struct blob_buf *buf, int minlen);
-	int buflen;
-	void *buf;
+	struct blob_attr *head; // pointer to current head
+	size_t buflen; // total length of buffer
+	void *buf; // raw buffer data
 };
 
 /*
@@ -193,7 +192,7 @@ extern int blob_attr_parse(struct blob_attr *attr, struct blob_attr **data, cons
 extern struct blob_attr *blob_attr_memdup(struct blob_attr *attr);
 extern bool blob_attr_check_type(const void *ptr, unsigned int len, int type);
 
-extern int blob_buf_init(struct blob_buf *buf);
+extern int blob_buf_init(struct blob_buf *buf, const char *data, size_t size);
 extern int blob_buf_reinit(struct blob_buf *buf, int id);
 extern void blob_buf_free(struct blob_buf *buf);
 extern bool blob_buf_grow(struct blob_buf *buf, int required);

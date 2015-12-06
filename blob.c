@@ -18,23 +18,7 @@
 
 #include "blob.h"
 
-static bool
-_blob_buf_grow(struct blob_buf *buf, int minlen)
-{
-	struct blob_buf *new;
-	int delta = ((minlen / 256) + 1) * 256;
-	new = realloc(buf->buf, buf->buflen + delta);
-	if (new) {
-		buf->buf = new;
-		memset(buf->buf + buf->buflen, 0, delta);
-		buf->buflen += delta;
-	}
-	return !!new;
-}
-
-static void
-blob_attr_init(struct blob_attr *attr, int id, unsigned int len)
-{
+static void blob_attr_init(struct blob_attr *attr, int id, unsigned int len){
 	memset(attr, 0, sizeof(struct blob_attr)); 
 	len &= BLOB_ATTR_LEN_MASK;
 	len |= (id << BLOB_ATTR_ID_SHIFT) & BLOB_ATTR_ID_MASK;
@@ -44,33 +28,36 @@ blob_attr_init(struct blob_attr *attr, int id, unsigned int len)
 static inline struct blob_attr *
 _blob_buf_offset_to_attr(struct blob_buf *buf, int offset)
 {
-	void *ptr = (char *)buf->buf + offset - BLOB_COOKIE;
+	void *ptr = (char *)buf->buf + offset;
 	return ptr;
 }
 
 static inline int
 _blob_buf_attr_to_offset(struct blob_buf *buf, struct blob_attr *attr)
 {
-	return (char *)attr - (char *) buf->buf + BLOB_COOKIE;
+	return (char *)attr - (char *) buf->buf;
 }
 
-bool
-blob_buf_grow(struct blob_buf *buf, int required)
-{
-	int offset_head = _blob_buf_attr_to_offset(buf, buf->head);
-
-	if (!buf->grow || !buf->grow(buf, required))
-		return false;
-
-	buf->head = _blob_buf_offset_to_attr(buf, offset_head);
-	return true;
+//! Attepts to reallocate the buffer to fit the new payload data
+bool blob_buf_grow(struct blob_buf *buf, int minlen){
+	char *new = 0;
+	int delta = ((minlen / 256) + 1) * 256;
+	new = realloc(buf->buf, buf->buflen + delta);
+	if (new) {
+		int offset_head = _blob_buf_attr_to_offset(buf, buf->head);
+		buf->buf = new;
+		memset(buf->buf + buf->buflen, 0, delta);
+		buf->buflen += delta;
+		buf->head = _blob_buf_offset_to_attr(buf, offset_head);
+	}
+	return !!new;
 }
 
 static struct blob_attr *
 _blob_buf_add(struct blob_buf *buf, struct blob_attr *pos, int id, int payload)
 {
 	int offset = _blob_buf_attr_to_offset(buf, pos);
-	int required = (offset - BLOB_COOKIE + sizeof(struct blob_attr) + payload) - buf->buflen;
+	int required = (offset + sizeof(struct blob_attr) + payload) - buf->buflen;
 	struct blob_attr *attr;
 
 	if (required > 0) {
@@ -83,37 +70,42 @@ _blob_buf_add(struct blob_buf *buf, struct blob_attr *pos, int id, int payload)
 
 	blob_attr_init(attr, id, payload + sizeof(struct blob_attr));
 	blob_attr_fill_pad(attr);
+
 	return attr;
 }
 
 int blob_buf_reinit(struct blob_buf *buf, int type){
-	buf->grow = _blob_buf_grow;
-
-	if (_blob_buf_add(buf, buf->buf, type, 0) == NULL)
-		return -ENOMEM;
+	buf->buf = buf->head; 
 
 	return 0;
 }
 
-int
-blob_buf_init(struct blob_buf *buf)
-{
+int blob_buf_init(struct blob_buf *buf, const char *data, size_t size){
 	memset(buf, 0, sizeof(struct blob_buf)); 
-	
-	return blob_buf_reinit(buf, 0); 
+
+	buf->buflen = (size > 0)?size:256; 
+	buf->buf = malloc(buf->buflen); 
+	if(!buf->buf) return -ENOMEM; 
+
+	if(data) {
+		memcpy(buf->buf, data, size); 
+		buf->head = buf->buf; 
+	} else {
+		memset(buf->buf, 0, buf->buflen); 
+		buf->head = buf->buf; 
+		blob_attr_init(buf->head, 0, sizeof(struct blob_attr)); 
+		blob_attr_fill_pad(buf->head); 
+	}
+	return 0; 
 }
 
-void
-blob_buf_free(struct blob_buf *buf)
-{
+void blob_buf_free(struct blob_buf *buf){
 	free(buf->buf);
 	buf->buf = NULL;
 	buf->buflen = 0;
 }
 
-void
-blob_attr_fill_pad(struct blob_attr *attr)
-{
+void blob_attr_fill_pad(struct blob_attr *attr) {
 	char *buf = (char *) attr;
 	int len = blob_attr_pad_len(attr);
 	int delta = len - blob_attr_raw_len(attr);

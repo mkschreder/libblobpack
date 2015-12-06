@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 {
 	struct blob_buf buf;
 	
-	blob_buf_init(&buf);
+	blob_buf_init(&buf, 0, 0);
 	for(int c = 0; c < 10; c++){
 		blobmsg_init(&buf); 
 		fill_message(&buf);

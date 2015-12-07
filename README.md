@@ -21,6 +21,18 @@ buffer is packed as a list of blob\_attr structures like this:
 	| id + len | data | id + len | data |  
 	+-----------------+-----------------+
 
+The id is packed with length as a single 32 bit integer. The limitation is that
+you can only have up to 127 field types with maximum data length of around 16M
+per field. 
+
+The bits of the id + len field are like this: 
+
+	[ ettt tttt ssssssss ssssssss ssssssss ]
+
+	- e: extended bit
+	- i: id bits
+	- s: size bits 
+
 ID can be one of the following: 
 
 	BLOB_ATTR_UNSPEC: unspecified (0)
@@ -36,6 +48,9 @@ If you logical "or" your ID with BLOB\_ATTR\_EXTENDED then you can use your own
 set of blob types. This is how blobmsg extension can pack it's own types using
 the same underlying structure as blob buf without running the risk of getting
 blob data mixed up. 
+
+Blobmsg Extension
+-----------------
 
 On top of this structure, blobpack also provides a blobmsg class. It helps you
 serialize arbitrary json data into binary blobs. Blobmsg uses the extended id
@@ -73,15 +88,20 @@ Binary Blob Buffer
 
 This is a class that allocates a binary buffer where you can then pack data. You can reuse the same blob buffer to pack data without reallocating memory by using blobbuf\_reinit() method. 
 	
-	blob_buf_init(struct blob_buf *buf) - initialize the buffer
+	blob_buf_init(struct blob_buf *buf, const char *data, size_t size) - initialize the buffer
 		
 		This function zeroes the blob_buf structure and allocates a default 256
-		byte buffer. 
+		byte buffer.
+		
+		Optionally initialize the new buffer with the provided data. The data
+		is copied into the newly allocated buffer.  
 			
 		usage: blob_buf_init(&buf); 
 		return: returns -ENOMEM if the buffer could not be allocated. 
 
-	blob_buf_reinit(struct blob_buf *buf, int id) - reinitialize a previously allocated buffer
+	blob_buf_reset(struct blob_buf *buf) - reset the buffer to point to the begining 
+
+		Does not deallocate any memory, just resets internal pointers and total buffer length. 
 		
 		Reinitializes the buffer and rewinds all offsets. Use this function
 		when you want to reuse a previously allocated buffer without having to

@@ -1,15 +1,25 @@
-all: libblobpack.a libblobpack.so simple-example random-test
 
+PACKAGE_NAME:=blobpack
 SOURCE:=$(wildcard *.c)
 HEADERS:=$(wildcard *.h)
 OBJECTS:=$(patsubst %.c,%.o,$(SOURCE))
 LDFLAGS+=-ljson-c
 CFLAGS+=-std=gnu99 -fPIC
+INSTALL_PREFIX:=/usr
 
-libblobpack.a: $(OBJECTS)
+STATIC_LIB:=lib$(PACKAGE_NAME).a
+SHARED_LIB:=lib$(PACKAGE_NAME).so
+
+PUBLIC_HEADERS:=blobpack.h blob.h blobmsg.h blobmsg_json.h utils.h
+HEADERS:=$(PUBLIC_HEADERS); 
+
+all: $(STATIC_LIB) $(SHARED_LIB) simple-example random-test
+
+$(STATIC_LIB): $(OBJECTS)
 	$(AR) rcs -o $@ $^ 
+	ranlib $@
 
-libblobpack.so: $(OBJECTS)
+$(SHARED_LIB): $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -shared -o $@ $^
 
 %.o: %.c 
@@ -21,5 +31,12 @@ simple-example: examples/simple.c libblobpack.a
 random-test: tests/random.c libblobpack.a
 	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblobpack -ljson-c
 
+install: 
+	mkdir -p $(INSTALL_PREFIX)/lib/ 
+	mkdir -p $(INSTALL_PREFIX)/include/$(PACKAGE_NAME)
+	cp -Rp $(STATIC_LIB) $(INSTALL_PREFIX)/lib/
+	cp -Rp $(SHARED_LIB) $(INSTALL_PREFIX)/lib/
+	cp -Rp $(PUBLIC_HEADERS) $(INSTALL_PREFIX)/include/$(PACKAGE_NAME)
+	
 clean: 
 	rm -f *.o *.a *.so *-example *-test

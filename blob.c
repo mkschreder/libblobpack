@@ -39,61 +39,72 @@ _blob_buf_attr_to_offset(struct blob_buf *buf, struct blob_attr *attr)
 }
 
 //! Attepts to reallocate the buffer to fit the new payload data
-bool blob_buf_grow(struct blob_buf *buf, int minlen){
+bool blob_buf_resize(struct blob_buf *buf, int minlen){
 	char *new = 0;
-	int delta = ((minlen / 256) + 1) * 256;
-	new = realloc(buf->buf, buf->buflen + delta);
-	if (new) {
-		int offset_head = _blob_buf_attr_to_offset(buf, buf->head);
-		buf->buf = new;
-		memset(buf->buf + buf->buflen, 0, delta);
-		buf->buflen += delta;
-		buf->head = _blob_buf_offset_to_attr(buf, offset_head);
+	int newsize = ((minlen / 256) + 1) * 256;
+	// reallocate the memory of the buffer if we no longer have any memory left
+	if(newsize > buf->memlen){
+		new = realloc(buf->buf, newsize);
+		if (new) {
+			int offset_head = _blob_buf_attr_to_offset(buf, buf->head);
+			buf->buf = new;
+			memset(buf->buf + buf->datalen, 0, newsize - buf->datalen);
+			buf->datalen = minlen;
+			buf->memlen = newsize;  
+			buf->head = _blob_buf_offset_to_attr(buf, offset_head);
+		} else { 
+			return false; 
+		}
+	} else {
+		// otherwise just increase the datalen without reallocating memory
+		buf->datalen = minlen; 
 	}
-	return !!new;
+	return true;
 }
 
 static struct blob_attr *
 _blob_buf_add(struct blob_buf *buf, struct blob_attr *pos, int id, int payload)
 {
-	int offset = _blob_buf_attr_to_offset(buf, pos);
-	int required = (offset + sizeof(struct blob_attr) + payload) - buf->buflen;
-	struct blob_attr *attr;
+	int offset = _blob_buf_attr_to_offset(buf, pos); // get offset to attr header in the buffer
+	int newsize = offset + sizeof(struct blob_attr) + payload;
+	struct blob_attr *attr = pos;
 
-	if (required > 0) {
-		if (!blob_buf_grow(buf, required))
+	if (newsize > buf->datalen) {
+		// if buffer needs to grow then we grow it
+		if (!blob_buf_resize(buf, newsize))
 			return NULL;
 		attr = _blob_buf_offset_to_attr(buf, offset);
-	} else {
-		attr = pos;
-	}
+	} 
 
 	blob_attr_init(attr, id, payload + sizeof(struct blob_attr));
 	blob_attr_fill_pad(attr);
-
+	
 	return attr;
 }
 
-int blob_buf_reinit(struct blob_buf *buf, int type){
+int blob_buf_reset(struct blob_buf *buf, int type){
+	memset(buf->buf, 0, buf->memlen); 
 	buf->head = buf->buf; 
 	blob_attr_init(buf->head, type, sizeof(struct blob_attr));
-	blob_attr_fill_pad(buf->head); 
+	blob_attr_fill_pad(buf->head);
 	return 0;
 }
 
 int blob_buf_init(struct blob_buf *buf, const char *data, size_t size){
 	memset(buf, 0, sizeof(struct blob_buf)); 
 
-	buf->buflen = (size > 0)?size:256; 
-	buf->buf = malloc(buf->buflen); 
+	// default buffer is 256 bytes block with zero sized data
+	buf->memlen = (size > 0)?size:256; 
+	buf->buf = malloc(buf->memlen); 
 	if(!buf->buf) return -ENOMEM; 
 
 	if(data) {
 		memcpy(buf->buf, data, size); 
 		buf->head = buf->buf; 
+		buf->datalen = size; 
 	} else {
-		memset(buf->buf, 0, buf->buflen); 
-		blob_buf_reinit(buf, 0); 
+		memset(buf->buf, 0, buf->memlen); 
+		blob_buf_reset(buf, 0); 
 	}
 	return 0; 
 }
@@ -101,7 +112,8 @@ int blob_buf_init(struct blob_buf *buf, const char *data, size_t size){
 void blob_buf_free(struct blob_buf *buf){
 	free(buf->buf);
 	buf->buf = NULL;
-	buf->buflen = 0;
+	buf->memlen = 0;
+	buf->datalen = 0; 
 }
 
 void blob_attr_fill_pad(struct blob_attr *attr) {
@@ -156,11 +168,13 @@ blob_buf_put(struct blob_buf *buf, int id, const void *ptr, unsigned int len)
 	struct blob_attr *attr;
 
 	attr = blob_buf_new_attr(buf, id, len);
-	if (!attr)
+	if (!attr) {
 		return NULL;
+	}
 
 	if (ptr)
 		memcpy(blob_attr_data(attr), ptr, len);
+
 	return attr;
 }
 

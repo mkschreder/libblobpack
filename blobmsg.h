@@ -203,7 +203,7 @@ blobmsg_close_table(struct blob_buf *buf, void *cookie)
 
 static inline int blobmsg_init(struct blob_buf *buf)
 {
-	return blob_buf_reinit(buf, BLOBMSG_TYPE_TABLE);
+	return blob_buf_reset(buf, BLOBMSG_TYPE_TABLE);
 }
 
 static inline uint8_t blobmsg_get_u8(struct blob_attr *attr)

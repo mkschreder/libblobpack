@@ -275,12 +275,12 @@ blobmsg_realloc_string_buffer(struct blob_buf *buf, unsigned int maxlen)
 {
 	struct blob_attr *attr = blob_attr_next(buf->head);
 	int offset = attr_to_offset(buf, blob_attr_next(buf->head)) + blob_attr_pad_len(attr);
-	int required = maxlen - (buf->buflen - offset);
+	int required = maxlen - (buf->datalen - offset);
 
 	if (required <= 0)
 		goto out;
 
-	blob_buf_grow(buf, required);
+	blob_buf_resize(buf, buf->datalen + required);
 	attr = blob_attr_next(buf->head);
 
 out:

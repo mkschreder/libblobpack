@@ -355,10 +355,12 @@ long double unpack754(uint64_t i, unsigned bits, unsigned expbits){
 }
 
 float blob_attr_get_float(const struct blob_attr *attr){
+	if(!attr) return 0; 
 	return unpack754_32(blob_attr_get_u32(attr)); 
 }
 
 double blob_attr_get_double(const struct blob_attr *attr){
+	if(!attr) return 0; 
 	return unpack754_64(blob_attr_get_u64(attr)); 
 }
 
@@ -370,4 +372,36 @@ struct blob_attr *blob_buf_put_double(struct blob_buf *buf, int id, double value
 	return blob_buf_put_u64(buf, id, pack754_64(value));
 } 
 
+void blob_buf_dump(struct blob_buf *self){
+	struct blob_attr *pos;
+	if(!self) return; 
+
+	struct blob_attr *cur = self->cursor; 
+
+	printf("=========== blob ===========\n"); 
+	for(int c = 0; c < blob_buf_size(self); c++){
+		if(c > 0 && c % 10 == 0)
+			printf("\n"); 
+		printf(" %02x", ((char*)self->buf)[c] & 0xff); 
+	}
+	printf("\n"); 
+
+	for(pos = blob_buf_first(self); pos; pos = blob_buf_next(self)){
+		int id = blob_attr_id(pos);
+		int len = blob_attr_len(pos);
+
+		printf("blobfield: id=%d offset=%d\n", id, (int)((char*)pos - (char*)self->buf)); 
+		printf("\tlength: %d\n", len); 
+		printf("\tpadlen: %d\n", blob_attr_pad_len(pos));
+
+		for(int c = 0; c < blob_attr_len(pos); c++){
+			if(c > 0 && c % 10 == 0)
+				printf("\n"); 
+			printf(" %02x", ((char*)pos->data)[c] & 0xff); 
+		}
+	}
+	printf("==\n"); 	
+
+	self->cursor = cur; 
+}
 

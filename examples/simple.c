@@ -20,7 +20,7 @@ dump_table(struct blob_attr *head, int len, int indent, bool array)
 	struct blobmsg_hdr *hdr;
 
 	indent_printf(indent, "{\n");
-	__blob_buf_for_each_attr(attr, head, len) {
+	for(attr = blobmsg_data(head); attr; attr = blob_attr_next(head, attr)){
 		hdr = blob_attr_data(attr);
 		if (!array)
 			indent_printf(indent + 1, "%s : ", hdr->name);
@@ -58,7 +58,7 @@ static void dump_attr_data(struct blob_attr *data, int indent, int next_indent)
 	case BLOBMSG_TYPE_ARRAY:
 		if (!indent)
 			indent_printf(indent, "\n");
-		dump_table(blobmsg_data(data), blobmsg_data_len(data),
+		dump_table(data, blobmsg_data_len(data),
 			   next_indent, type == BLOBMSG_TYPE_ARRAY);
 		break;
 	}
@@ -102,11 +102,11 @@ static void dump_message(struct blob_buf *buf)
 
 	if (tb[FOO_LIST]) {
 		fprintf(stderr, "List: ");
-		dump_table(blobmsg_data(tb[FOO_LIST]), blobmsg_data_len(tb[FOO_LIST]), 0, true);
+		dump_table(tb[FOO_LIST], blobmsg_data_len(tb[FOO_LIST]), 0, true);
 	}
 	if (tb[FOO_TESTDATA]) {
 		fprintf(stderr, "Testdata: ");
-		dump_table(blobmsg_data(tb[FOO_TESTDATA]), blobmsg_data_len(tb[FOO_TESTDATA]), 0, false);
+		dump_table(tb[FOO_TESTDATA], blobmsg_data_len(tb[FOO_TESTDATA]), 0, false);
 	}
 }
 

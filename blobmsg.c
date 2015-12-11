@@ -68,7 +68,7 @@ int blobmsg_check_array(const struct blob_attr *attr, int type)
 {
 	struct blob_attr *cur;
 	bool name;
-	int rem;
+	//int rem;
 	int size = 0;
 
 	switch (blobmsg_type(attr)) {
@@ -82,7 +82,8 @@ int blobmsg_check_array(const struct blob_attr *attr, int type)
 		return -1;
 	}
 
-	blobmsg_for_each_attr(cur, attr, rem) {
+	//blobmsg_for_each_attr(cur, attr, rem) {
+	for(cur = blobmsg_data(attr); cur; cur = blob_attr_next(attr, cur)){
 		if (type != BLOBMSG_TYPE_UNSPEC && blobmsg_type(cur) != type)
 			return -1;
 
@@ -100,25 +101,23 @@ bool blobmsg_check_attr_list(const struct blob_attr *attr, int type)
 	return blobmsg_check_array(attr, type) >= 0;
 }
 
-int blobmsg_parse_array(const struct blobmsg_policy *policy, int policy_len,
-			struct blob_attr **tb, void *data, unsigned int len)
-{
-	struct blob_attr *attr;
+int blobmsg_parse_array(struct blob_attr *attr, const struct blobmsg_policy *policy, int policy_len, struct blob_attr **tb){
 	int i = 0;
 
 	memset(tb, 0, policy_len * sizeof(*tb));
-	__blob_buf_for_each_attr(attr, data, len) {
+	//__blob_buf_for_each_attr(attr, data, len) {
+	for(struct blob_attr *pos = blobmsg_data(attr); pos; pos = blob_attr_next(attr, pos)){
 		if (policy[i].type != BLOBMSG_TYPE_UNSPEC &&
-		    blob_attr_id(attr) != policy[i].type)
+		    blob_attr_id(pos) != policy[i].type)
 			continue;
 
-		if (!blobmsg_check_attr(attr, false))
+		if (!blobmsg_check_attr(pos, false))
 			return -1;
 
 		if (tb[i])
 			continue;
 
-		tb[i++] = attr;
+		tb[i++] = pos;
 		if (i == policy_len)
 			break;
 	}
@@ -167,12 +166,10 @@ void blobmsg_dump(struct blob_buf *self){
 int blobmsg_parse(struct blob_buf *buf, const struct blobmsg_policy *policy, int policy_len,
                   struct blob_attr **tb)
 {
-	struct blobmsg_hdr *hdr;
+	//struct blobmsg_hdr *hdr;
 	struct blob_attr *pos;
 	uint8_t *pslen;
 	int i;
-	struct blob_attr *attr = blob_buf_first(buf); 
-	//int len = blob_attr_len(attr); 
 
 	memset(tb, 0, policy_len * sizeof(*tb));
 	pslen = alloca(policy_len);
@@ -184,8 +181,9 @@ int blobmsg_parse(struct blob_buf *buf, const struct blobmsg_policy *policy, int
 	}
 	
 	//__blob_buf_for_each_attr(pos, attr, len) {
-	for(pos = blob_buf_first(buf); pos; pos = blob_attr_next(attr, pos)){
-		hdr = blob_attr_data(pos);
+	struct blob_attr *root = blob_buf_first(buf); 
+	for(pos = blobmsg_data(root); pos; pos = blob_attr_next(root, pos)){
+		//hdr = blob_attr_data(pos);
 		for (i = 0; i < policy_len; i++) {
 			if (!policy[i].name)
 				continue;
@@ -194,8 +192,8 @@ int blobmsg_parse(struct blob_buf *buf, const struct blobmsg_policy *policy, int
 			    blob_attr_id(pos) != policy[i].type)
 				continue;
 
-			if (blobmsg_namelen(hdr) != pslen[i])
-				continue;
+			if (strlen(blobmsg_name(pos)) != pslen[i])
+					continue;
 
 			if (!blobmsg_check_attr(pos, true))
 				return -1;
@@ -203,7 +201,7 @@ int blobmsg_parse(struct blob_buf *buf, const struct blobmsg_policy *policy, int
 			if (tb[i])
 				continue;
 
-			if (strcmp(policy[i].name, (char *) hdr->name) != 0)
+			if (strcmp(policy[i].name, blobmsg_name(pos)) != 0)
 				continue;
 
 			tb[i] = pos;

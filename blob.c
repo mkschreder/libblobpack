@@ -199,10 +199,11 @@ blob_attr_parse(struct blob_attr *attr, struct blob_attr **data, const struct bl
 {
 	struct blob_attr *pos;
 	int found = 0;
-	int rem;
+	//int rem;
 
 	memset(data, 0, sizeof(struct blob_attr *) * max);
-	blob_buf_for_each_attr(pos, attr, rem) {
+	//blob_buf_for_each_attr(pos, attr, rem) {
+	for(pos = blob_attr_data(attr); pos; pos = blob_attr_next(attr, pos)){ 
 		int id = blob_attr_id(pos);
 		int len = blob_attr_len(pos);
 

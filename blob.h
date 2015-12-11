@@ -294,6 +294,7 @@ struct blob_attr *blob_buf_put_double(struct blob_buf *buf, int id, double value
 #define blob_buf_put_int32	blob_buf_put_u32
 #define blob_buf_put_int64	blob_buf_put_u64
 
+/*
 #define __blob_buf_for_each_attr(pos, attr, rem) \
 	for (pos = (void *) attr; \
 	     rem > 0 && (blob_attr_pad_len(pos) <= rem) && \
@@ -307,6 +308,6 @@ struct blob_attr *blob_buf_put_double(struct blob_buf *buf, int id, double value
 	     rem > 0 && (blob_attr_pad_len(pos) <= rem) && \
 	     (blob_attr_pad_len(pos) >= sizeof(struct blob_attr)); \
 	     rem -= blob_attr_pad_len(pos), pos = blob_attr_next(attr, pos))
-
+*/
 
 #endif

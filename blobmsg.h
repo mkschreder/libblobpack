@@ -116,8 +116,8 @@ int blobmsg_check_array(const struct blob_attr *attr, int type);
 
 int blobmsg_parse(struct blob_buf *self, const struct blobmsg_policy *policy, int policy_len,
                   struct blob_attr **tb);
-int blobmsg_parse_array(const struct blobmsg_policy *policy, int policy_len,
-			struct blob_attr **tb, void *data, unsigned int len);
+int blobmsg_parse_array(struct blob_attr *attr, const struct blobmsg_policy *policy, int policy_len,
+			struct blob_attr **tb);
 
 int blobmsg_add_field(struct blob_buf *buf, int type, const char *name,
                       const void *data, unsigned int len);
@@ -269,11 +269,12 @@ void blobmsg_printf(struct blob_buf *buf, const char *name, const char *format, 
 
 /* blobmsg to json formatting */
 
+/*
 #define blobmsg_for_each_attr(pos, attr, rem) \
 	for (rem = attr ? blobmsg_data_len(attr) : 0, \
 	     pos = attr ? blobmsg_data(attr) : 0; \
 	     rem > 0 && (blob_attr_pad_len(pos) <= rem) && \
 	     (blob_attr_pad_len(pos) >= sizeof(struct blob_attr)); \
 	     rem -= blob_attr_pad_len(pos), pos = blob_attr_next(attr, pos))
-
+*/
 #endif

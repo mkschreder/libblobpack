@@ -93,7 +93,7 @@ static void dump_message(struct blob_buf *buf)
 {
 	struct blob_attr *tb[ARRAY_SIZE(pol)];
 
-	if (blobmsg_parse(pol, ARRAY_SIZE(pol), tb, blob_attr_data(buf->head), blob_attr_len(buf->head)) != 0) {
+	if (blobmsg_parse(buf, pol, ARRAY_SIZE(pol), tb) != 0) {
 		fprintf(stderr, "Parse failed\n");
 		return;
 	}
@@ -115,6 +115,8 @@ fill_message(struct blob_buf *buf)
 {
 	void *tbl;
 
+	void *root = blobmsg_open_table(buf, NULL); 
+
 	blobmsg_add_string(buf, "message", "Hello, world!");
 
 	tbl = blobmsg_open_table(buf, "testdata");
@@ -128,6 +130,8 @@ fill_message(struct blob_buf *buf)
 	blobmsg_add_u32(buf, NULL, 2);
 	blobmsg_add_f32(buf, NULL, 0.123);
 	blobmsg_close_array(buf, tbl);
+
+	blobmsg_close_table(buf, root); 
 }
 
 int main(int argc, char **argv)
@@ -136,10 +140,11 @@ int main(int argc, char **argv)
 	
 	blob_buf_init(&buf, 0, 0);
 	for(int c = 0; c < 10; c++){
-		blobmsg_init(&buf); 
+		blob_buf_reset(&buf); 
 		fill_message(&buf);
+		//blobmsg_dump(&buf); 
 		dump_message(&buf);
-		char *json = blobmsg_format_json(buf.head, true); 
+		char *json = blobmsg_format_json(blob_buf_first(&buf), false); 
 	 	printf("json: %s\n", json);
 		free(json); 
 	}

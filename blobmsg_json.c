@@ -205,14 +205,13 @@ static void blobmsg_format_string(struct strbuf *s, const char *str)
 	blobmsg_puts(s, "\"", 1);
 }
 
-static void blobmsg_format_json_list(struct strbuf *s, struct blob_attr *attr, int len, bool array);
+static void blobmsg_format_json_list(struct strbuf *s, struct blob_attr *attr, bool array);
 
 static void blobmsg_format_element(struct strbuf *s, struct blob_attr *attr, bool array, bool head)
 {
 	const char *data_str;
 	char buf[32];
 	void *data;
-	int len;
 
 	if (!blobmsg_check_attr(attr, false))
 		return;
@@ -223,7 +222,6 @@ static void blobmsg_format_element(struct strbuf *s, struct blob_attr *attr, boo
 	}
 
 	data = blobmsg_data(attr);
-	len = blobmsg_data_len(attr);
 
 	if (!head && s->custom_format) {
 		data_str = s->custom_format(s->priv, attr);
@@ -255,13 +253,13 @@ static void blobmsg_format_element(struct strbuf *s, struct blob_attr *attr, boo
 		sprintf(buf, "%Le", unpack754_64(be64_to_cpu(*(uint64_t*)data))); 
 		break; 
 	case BLOBMSG_TYPE_STRING:
-		blobmsg_format_string(s, data);
+		blobmsg_format_string(s, blobmsg_data(attr));
 		return;
 	case BLOBMSG_TYPE_ARRAY:
-		blobmsg_format_json_list(s, data, len, true);
+		blobmsg_format_json_list(s, attr, true);
 		return;
 	case BLOBMSG_TYPE_TABLE:
-		blobmsg_format_json_list(s, data, len, false);
+		blobmsg_format_json_list(s, attr, false);
 		return;
 	}
 
@@ -269,16 +267,16 @@ out:
 	blobmsg_puts(s, data_str, strlen(data_str));
 }
 
-static void blobmsg_format_json_list(struct strbuf *s, struct blob_attr *attr, int len, bool array)
-{
+static void blobmsg_format_json_list(struct strbuf *s, struct blob_attr *attr, bool array){
 	struct blob_attr *pos;
 	bool first = true;
-	int rem = len;
 
 	blobmsg_puts(s, (array ? "[" : "{" ), 1);
 	s->indent_level++;
 	add_separator(s);
-	__blob_buf_for_each_attr(pos, attr, rem) {
+
+	//__blob_buf_for_each_attr(pos, attr, rem) {
+	for(pos = blobmsg_data(attr); pos; pos = blob_attr_next(attr, pos)){
 		if (!first) {
 			blobmsg_puts(s, ",", 1);
 			add_separator(s);
@@ -311,9 +309,9 @@ char *blobmsg_format_json_with_cb(struct blob_attr *attr, bool list, blobmsg_jso
 
 	array = blob_attr_is_extended(attr) &&
 		blobmsg_type(attr) == BLOBMSG_TYPE_ARRAY;
-
+	
 	if (list)
-		blobmsg_format_json_list(&s, blobmsg_data(attr), blobmsg_data_len(attr), array);
+		blobmsg_format_json_list(&s, attr, array);
 	else
 		blobmsg_format_element(&s, attr, false, false);
 

@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+#include <assert.h>
 
 #include "utils.h"
 
@@ -63,8 +64,9 @@ struct blob_attr_info {
 };
 
 struct blob_buf {
-	struct blob_attr *head; // pointer to current head
-	struct blob_attr *cursor; 
+	//struct blob_attr *head; // pointer to current head
+	//struct blob_attr *cursor; // pointer to current position in the buffer (when adding or removing items)
+	size_t cursor; 
 	size_t datalen; // length of filled data in the buffer
 	size_t memlen; // total length of the allocated memory area 
 	void *buf; // raw buffer data
@@ -192,10 +194,11 @@ blob_attr_get_raw(const struct blob_attr *attr, uint8_t *data, size_t data_size)
 float blob_attr_get_float(const struct blob_attr *attr); 
 double blob_attr_get_double(const struct blob_attr *attr); 
 
-static inline struct blob_attr *
-blob_attr_next(const struct blob_attr *attr)
-{
-	return (struct blob_attr *) ((char *) attr + blob_attr_pad_len(attr));
+static inline struct blob_attr *blob_attr_next(const struct blob_attr *owner, const struct blob_attr *attr){
+	struct blob_attr *ret = (struct blob_attr *) ((char *) attr + blob_attr_raw_len(attr));
+	size_t offset = (char*)ret - (char*)owner; 
+	if(offset >= blob_attr_pad_len(owner)) return NULL; 
+	return ret; 
 }
 
 extern void blob_attr_fill_pad(struct blob_attr *attr);
@@ -206,7 +209,7 @@ extern struct blob_attr *blob_attr_memdup(struct blob_attr *attr);
 extern bool blob_attr_check_type(const void *ptr, unsigned int len, int type);
 
 extern int blob_buf_init(struct blob_buf *buf, const char *data, size_t size);
-extern int blob_buf_reset(struct blob_buf *buf, int id);
+extern void blob_buf_reset(struct blob_buf *buf);
 extern void blob_buf_free(struct blob_buf *buf);
 extern bool blob_buf_resize(struct blob_buf *buf, int newsize);
 extern struct blob_attr *blob_buf_new_attr(struct blob_buf *buf, int id, int payload);
@@ -216,26 +219,31 @@ extern struct blob_attr *blob_buf_put(struct blob_buf *buf, int id, const void *
 extern struct blob_attr *blob_buf_put_raw(struct blob_buf *buf, const void *ptr, unsigned int len);
 void blob_buf_dump(struct blob_buf *self); 
 
-static inline struct blob_attr *
-blob_buf_first(struct blob_buf *self){
-	self->cursor = blob_attr_data((struct blob_attr*)self->buf); 
-	return self->cursor; 
+static inline struct blob_attr *blob_buf_offset_to_attr(struct blob_buf *buf, size_t offset){
+	void *ptr = (char *)buf->buf + offset;
+	return ptr;
 }
 
-static inline struct blob_attr *
-blob_buf_next(struct blob_buf *self){
-	if(!self->cursor) return NULL; 
-	int len = blob_attr_pad_len(self->cursor);
-	if(len < 0 || ((char*)(self->cursor) + len) > ((char*)self->buf + self->datalen)) return NULL; 
-	struct blob_attr *next = (struct blob_attr *) ((char *) self->cursor + len);
-	if((char*)next >= (char*)(self->buf + self->datalen)) {
-		return NULL; 
-	} 
-
-	self->cursor = next; 
-	return self->cursor; 
+static inline size_t blob_buf_attr_to_offset(struct blob_buf *buf, struct blob_attr *attr){
+	return (char *)attr - (char *) buf->buf;
 }
 
+static inline struct blob_attr *blob_buf_first(struct blob_buf *self){
+	return (struct blob_attr*)self->buf; 
+}
+
+static inline struct blob_attr *blob_buf_current(struct blob_buf *self){
+	return (struct blob_attr*)((char*)self->buf + self->cursor); 
+}
+
+/*
+static inline struct blob_attr *blob_buf_next(struct blob_buf *self){
+	int len = blob_attr_pad_len(blob_buf_current(self));
+	if(len < 0 || (self->cursor + len) > self->datalen) return NULL; 
+	self->cursor += len; 
+	return blob_buf_current(self);
+}
+*/
 static inline size_t blob_buf_size(struct blob_buf *self){ return self->datalen; }
 static inline struct blob_attr *
 blob_buf_put_string(struct blob_buf *buf, int id, const char *str)
@@ -290,7 +298,7 @@ struct blob_attr *blob_buf_put_double(struct blob_buf *buf, int id, double value
 	for (pos = (void *) attr; \
 	     rem > 0 && (blob_attr_pad_len(pos) <= rem) && \
 	     (blob_attr_pad_len(pos) >= sizeof(struct blob_attr)); \
-	     rem -= blob_attr_pad_len(pos), pos = blob_attr_next(pos))
+	     rem -= blob_attr_pad_len(pos), pos = blob_attr_next(attr, pos))
 
 
 #define blob_buf_for_each_attr(pos, attr, rem) \
@@ -298,7 +306,7 @@ struct blob_attr *blob_buf_put_double(struct blob_buf *buf, int id, double value
 	     pos = attr ? blob_attr_data(attr) : 0; \
 	     rem > 0 && (blob_attr_pad_len(pos) <= rem) && \
 	     (blob_attr_pad_len(pos) >= sizeof(struct blob_attr)); \
-	     rem -= blob_attr_pad_len(pos), pos = blob_attr_next(pos))
+	     rem -= blob_attr_pad_len(pos), pos = blob_attr_next(attr, pos))
 
 
 #endif

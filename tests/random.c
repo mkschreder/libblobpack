@@ -1,4 +1,4 @@
-#include <blobpack.h>
+#include "blobpack.h"
 
 enum {
 	FIELD_STRING, 
@@ -26,16 +26,15 @@ int main(int argc, char **argv){
 
 	struct blob_buf b; 
 	blob_buf_init(&b, 0, 0); 
-	blobmsg_init(&b); 
 
 	blobmsg_add_string(&b, "string", "foo"); 
 	blobmsg_add_u32(&b, "int32", 123); 
 
-	printf("raw len: %d\n", blob_attr_raw_len(b.head)); 
-	blob_buf_init(&buf, data, 256); //b.buf, b.buflen); 
+	printf("raw len: %u\n", (uint32_t)blob_buf_size(&b)); 
+	blob_buf_init(&buf, data, 256); 
 	struct blob_attr *out[FIELD_MAX]; 
 
-	if(-1 == blobmsg_parse(policy, FIELD_MAX, out, blob_attr_data(buf.head), blob_attr_len(buf.head))){
+	if(-1 == blobmsg_parse(&buf, policy, FIELD_MAX, out)){
 		printf("Error parsing blob!\n"); 
 	}
 	

@@ -69,7 +69,7 @@ static inline const char *blobmsg_name(const struct blob_attr *attr)
 
 static inline int blobmsg_type(const struct blob_attr *attr)
 {
-	if(!attr) return -1; 
+	if(!attr) return BLOBMSG_TYPE_UNSPEC; 
 	return blob_attr_id(attr);
 }
 
@@ -105,6 +105,7 @@ static inline int blobmsg_len(const struct blob_attr *attr)
 bool blobmsg_check_attr(const struct blob_attr *attr, bool name);
 bool blobmsg_check_attr_list(const struct blob_attr *attr, int type);
 
+void blobmsg_dump(struct blob_buf *buf); 
 /*
  * blobmsg_check_array: validate array/table and return size
  *
@@ -113,8 +114,8 @@ bool blobmsg_check_attr_list(const struct blob_attr *attr, int type);
  */
 int blobmsg_check_array(const struct blob_attr *attr, int type);
 
-int blobmsg_parse(const struct blobmsg_policy *policy, int policy_len,
-                  struct blob_attr **tb, void *data, unsigned int len);
+int blobmsg_parse(struct blob_buf *self, const struct blobmsg_policy *policy, int policy_len,
+                  struct blob_attr **tb);
 int blobmsg_parse_array(const struct blobmsg_policy *policy, int policy_len,
 			struct blob_attr **tb, void *data, unsigned int len);
 
@@ -201,11 +202,6 @@ blobmsg_close_table(struct blob_buf *buf, void *cookie)
 	blob_buf_nest_end(buf, cookie);
 }
 
-static inline int blobmsg_init(struct blob_buf *buf)
-{
-	return blob_buf_reset(buf, BLOBMSG_TYPE_TABLE);
-}
-
 static inline uint8_t blobmsg_get_u8(struct blob_attr *attr)
 {
 	if(!attr) return 0; 
@@ -262,8 +258,8 @@ static inline char *blobmsg_get_string(struct blob_attr *attr)
 	return (char *) blobmsg_data(attr);
 }
 
-void *blobmsg_alloc_string_buffer(struct blob_buf *buf, const char *name, unsigned int maxlen);
-void *blobmsg_realloc_string_buffer(struct blob_buf *buf, unsigned int maxlen);
+struct blob_attr *blobmsg_alloc_string(struct blob_buf *buf, const char *name, unsigned int maxlen);
+//void *blobmsg_realloc_string_buffer(struct blob_buf *buf, unsigned int maxlen);
 void blobmsg_add_string_buffer(struct blob_buf *buf);
 
 void blobmsg_vprintf(struct blob_buf *buf, const char *name, const char *format, va_list arg);
@@ -278,6 +274,6 @@ void blobmsg_printf(struct blob_buf *buf, const char *name, const char *format, 
 	     pos = attr ? blobmsg_data(attr) : 0; \
 	     rem > 0 && (blob_attr_pad_len(pos) <= rem) && \
 	     (blob_attr_pad_len(pos) >= sizeof(struct blob_attr)); \
-	     rem -= blob_attr_pad_len(pos), pos = blob_attr_next(pos))
+	     rem -= blob_attr_pad_len(pos), pos = blob_attr_next(attr, pos))
 
 #endif

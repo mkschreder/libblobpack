@@ -17,6 +17,7 @@ Blobpack packs attributes into a blob buffer. Each attribute has an id which
 identifies the type of attribute inside the blob buffer. The data inside the
 buffer is packed as a list of blob\_attr structures like this: 
 
+            attr             attr
 	+-----------------+-----------------+
 	| id + len | data | id + len | data |  
 	+-----------------+-----------------+
@@ -69,9 +70,10 @@ Note that all attributes in the blobmsg structure are named. If in the simple bl
 
 A blobmsg buffer looks like this: 
 
-	+-----------------------------------+----------+------+------+
-	| BLOBMSG_TYPE | EXTENDED + TOT_LEN | name_len | name | data |
-	+-----------------------------------+----------+------+------+
+    |                        blobmsg    | blobmsg_hdr     | blobmsg_data | 
+	+-----------------------------------+----------+------+--------------+
+	| BLOBMSG_TYPE | EXTENDED + TOT_LEN | name_len | name |  blob_attr   |
+	+-----------------------------------+----------+------+--------------+
 
 Note: each field is padded using BLOBMSG\_PADDING(len) macro. 
 

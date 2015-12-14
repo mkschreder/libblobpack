@@ -115,6 +115,9 @@ fill_message(struct blob_buf *buf)
 {
 	void *tbl;
 
+	//blob_buf_put_u32(buf, BLOB_ATTR_INT32, 0xbe); 
+	//blob_buf_put_string(buf, BLOB_ATTR_STRING, "a string"); 
+
 	void *root = blobmsg_open_table(buf, NULL); 
 
 	blobmsg_add_string(buf, "message", "Hello, world!");
@@ -142,13 +145,15 @@ int main(int argc, char **argv)
 	for(int c = 0; c < 10; c++){
 		blob_buf_reset(&buf); 
 		fill_message(&buf);
-		//blobmsg_dump(&buf); 
+		blob_buf_dump(&buf); 
+		blobmsg_dump(&buf); 
 		dump_message(&buf);
 		char *json = blobmsg_format_json(blob_buf_first(&buf), false); 
 	 	printf("json: %s\n", json);
 		free(json); 
 	}
 
+	fflush(stdout); 
 	blob_buf_free(&buf); 
 	return 0;
 }

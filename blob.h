@@ -66,11 +66,16 @@ struct blob_attr_info {
 struct blob_buf {
 	//struct blob_attr *head; // pointer to current head
 	//struct blob_attr *cursor; // pointer to current position in the buffer (when adding or removing items)
-	size_t cursor; 
-	size_t datalen; // length of filled data in the buffer
+	//size_t cursor; 
+	//size_t datalen; // length of filled data in the buffer
 	size_t memlen; // total length of the allocated memory area 
 	void *buf; // raw buffer data
 };
+
+//! Returns first attribute of the buffer which is always null attribute with length set to length of the whole buffer
+static inline struct blob_attr *blob_buf_head(struct blob_buf *self){
+	return (struct blob_attr*)self->buf; 
+}
 
 /*
  * blob_data: returns the data pointer for an attribute
@@ -194,13 +199,20 @@ blob_attr_get_raw(const struct blob_attr *attr, uint8_t *data, size_t data_size)
 float blob_attr_get_float(const struct blob_attr *attr); 
 double blob_attr_get_double(const struct blob_attr *attr); 
 
+
+static inline struct blob_attr *blob_buf_next(struct blob_buf *self, const struct blob_attr *attr){
+	struct blob_attr *ret = (struct blob_attr *) ((void *) attr + blob_attr_pad_len(attr));
+	// return null if the new element is outside of the buffer
+	if((char*)ret >= (char*)(self->buf + blob_attr_pad_len(blob_buf_head(self)))) return NULL; 
+	return ret; 
+}
 static inline struct blob_attr *blob_attr_next(const struct blob_attr *owner, const struct blob_attr *attr){
-	struct blob_attr *ret = (struct blob_attr *) ((char *) attr + blob_attr_raw_len(attr));
+	struct blob_attr *ret = (struct blob_attr *) ((char *) attr + blob_attr_pad_len(attr));
+	assert(attr); 
 	size_t offset = (char*)ret - (char*)owner; 
 	if(offset >= blob_attr_pad_len(owner)) return NULL; 
 	return ret; 
 }
-
 extern void blob_attr_fill_pad(struct blob_attr *attr);
 extern void blob_attr_set_raw_len(struct blob_attr *attr, unsigned int len);
 extern bool blob_attr_equal(const struct blob_attr *a1, const struct blob_attr *a2);
@@ -212,6 +224,10 @@ extern int blob_buf_init(struct blob_buf *buf, const char *data, size_t size);
 extern void blob_buf_reset(struct blob_buf *buf);
 extern void blob_buf_free(struct blob_buf *buf);
 extern bool blob_buf_resize(struct blob_buf *buf, int newsize);
+
+static inline void* blob_buf_data(struct blob_buf *buf) { return buf->buf; }
+static inline size_t blob_buf_size(struct blob_buf *self){ return blob_attr_pad_len(blob_buf_head(self)); }
+
 extern struct blob_attr *blob_buf_new_attr(struct blob_buf *buf, int id, int payload);
 extern void *blob_buf_nest_start(struct blob_buf *buf, int id);
 extern void blob_buf_nest_end(struct blob_buf *buf, void *cookie);
@@ -229,13 +245,13 @@ static inline size_t blob_buf_attr_to_offset(struct blob_buf *buf, struct blob_a
 }
 
 static inline struct blob_attr *blob_buf_first(struct blob_buf *self){
-	return (struct blob_attr*)self->buf; 
+	return (struct blob_attr*)blob_attr_data(blob_buf_head(self));
 }
-
+/*
 static inline struct blob_attr *blob_buf_current(struct blob_buf *self){
 	return (struct blob_attr*)((char*)self->buf + self->cursor); 
 }
-
+*/
 /*
 static inline struct blob_attr *blob_buf_next(struct blob_buf *self){
 	int len = blob_attr_pad_len(blob_buf_current(self));
@@ -244,7 +260,6 @@ static inline struct blob_attr *blob_buf_next(struct blob_buf *self){
 	return blob_buf_current(self);
 }
 */
-static inline size_t blob_buf_size(struct blob_buf *self){ return self->datalen; }
 static inline struct blob_attr *
 blob_buf_put_string(struct blob_buf *buf, int id, const char *str)
 {

@@ -1,6 +1,6 @@
 #pragma once
 
 #include "blob.h"
-#include "blobmsg.h"
+#include "blob_attr.h"
 #include "blobmsg_json.h"
 

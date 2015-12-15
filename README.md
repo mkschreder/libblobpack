@@ -1,54 +1,83 @@
 Binary Blob Library
 -------------------
 
-This small library allows you to pack objects into binary blobs in a cross
-platform fashion. 
+Blobpack is a library for packing arbitrary structured data into binary blobs.
+Originally based on OpenWRT blob packing code and slightly inspired by msgpack. 
 
-Blobpack is based on blobmsg code from openwrt libubox, however there were
-inconsistencies in the original code that were not easily fixable because many
-applications depend on the public contract of libubox. Therefore, libblobpack
-was created where the original interface has been refactored and cleaned up
-without modifying the underlying functionality of the library. 
+The blobs are packed in platform independent format so you can use blobpack to
+pack data on one platform and then unpack it on a different one regardless of
+it's endianness. 
 
 How does it work?
 -----------------
 
-Blobpack packs attributes into a blob buffer. Each attribute has an id which
-identifies the type of attribute inside the blob buffer. The data inside the
-buffer is packed as a list of blob\_attr structures like this: 
+Blobpack packs attributes into a blob buffer. Each attribute has a 4 byte
+header containing attribyte type and length of the whole attribute including
+both header and data. If NAME bit is set then the next two bytes are the length
+of the name of the attribute followed by the name and then followed by the
+data. 
+
+Unnamed attributes: 
 
             attr             attr
 	+-----------------+-----------------+
-	| id + len | data | id + len | data |  
+	| hhhh | data..   | hhhh | data     |  
 	+-----------------+-----------------+
 
-The id is packed with length as a single 32 bit integer. The limitation is that
-you can only have up to 127 field types with maximum data length of around 16M
-per field. 
+Named attribute: 
+	
+	+-----------------------------+
+	| hhhh | ll | nnnn.. | data.. | 
+	+-----------------------------+
 
-The bits of the id + len field are like this: 
+The header consists of 4 bytes which have this layout: 
 
 	[ ettt tttt ssssssss ssssssss ssssssss ]
 
-	- e: extended bit
-	- i: id bits
-	- s: size bits 
+	- n: if set then the attribute has a name 
+	- t: type of the attribute (see below)
+	- s: size of whole attribute (header+name+data)
 
-ID can be one of the following: 
+Type can be one of the following: 
 
-	BLOB_ATTR_UNSPEC: unspecified (0)
-	BLOB_ATTR_NESTED: this attribute is a nested blob buffer
-	BLOB_ATTR_BINARY: the attribute contains binary data
-	BLOB_ATTR_STRING: the attribute is a null terminated string
-	BLOB_ATTR_INT8: the attribute is a char
-	BLOB_ATTR_INT16: the attribute is a short integer
-	BLOB_ATTR_INT32: the attribute is a 32 bit integer
-	BLOB_ATTR_INT64: the attribute is a 64 bit integer
+	BLOB_ATTR_ROOT: this is root element. For historical reasons it is has type of 0 
+	BLOB_ATTR_ARRAY: this element can only contain unnamed elements
+	BLOB_ATTR_TABLE: this element can contain named elements
+	BLOB_ATTR_BINARY: a binary blob. We don't care about content.  
+	BLOB_ATTR_STRING: a null terminated string
+	BLOB_ATTR_INT8: an 8 bit signed/unsigned integer 
+	BLOB_ATTR_INT16: a 16 bit signed/unsigned integer
+	BLOB_ATTR_INT32: a 32 bit signed/unsigned int
+	BLOB_ATTR_INT64: a 64 bit signed/unsigned int
+	BLOB_ATTR_FLOAT32: a packed 32 bit float
+	BLOB_ATTR_FLOAT64: a packed 64 bit float
 
-If you logical "or" your ID with BLOB\_ATTR\_EXTENDED then you can use your own
-set of blob types. This is how blobmsg extension can pack it's own types using
-the same underlying structure as blob buf without running the risk of getting
-blob data mixed up. 
+A blob buffer always contains one root element which has size of the whole
+buffer. Root element has type bits set to all zeros.  
+
+    +--------------------------+
+	| hhhh | other elements... |
+	+--------------------------+
+
+API Reference
+-------------
+	
+	//! Initializes a blob_buf structure. Optionally takes memory area to be copied into the buffer which must represent a valid blob buf. 
+	void blob_buf_init(struct blob_buf *buf, const char *data, size_t size);
+
+		
+Packing complex structures
+--------------------------
+
+	struct blob_buf buf; 
+	blob_buf_init(&buf); // buffer now contains header with size 4 bytes
+	// put an unnamed element of type u8
+	blob_buf_put_u8(&buf, NULL, 0x12); 
+	// put a named string
+	blob_buf_put_string(&buf, "name", "value"); 
+	// get the raw buffer
+	char *data = malloc(blob_buf_size(&buf)); 
+	memcpy(data, blob_buf_head(&buf), blob_buf_size(&buf)); 
 
 Blobmsg Extension
 -----------------

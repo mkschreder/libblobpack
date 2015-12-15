@@ -17,49 +17,46 @@ static void
 dump_table(struct blob_attr *head, int len, int indent, bool array)
 {
 	struct blob_attr *attr;
-	struct blobmsg_hdr *hdr;
 
 	indent_printf(indent, "{\n");
-	for(attr = blobmsg_data(head); attr; attr = blob_attr_next(head, attr)){
-		hdr = blob_attr_data(attr);
+	for(attr = blob_attr_first_child(head); attr; attr = blob_attr_next_child(head, attr)){
 		if (!array)
-			indent_printf(indent + 1, "%s : ", hdr->name);
+			indent_printf(indent + 1, "%s : ", blob_attr_name(attr));
 		dump_attr_data(attr, 0, indent + 1);
 	}
 	indent_printf(indent, "}\n");
 }
-
 static void dump_attr_data(struct blob_attr *data, int indent, int next_indent)
 {
-	int type = blobmsg_type(data);
+	int type = blob_attr_type(data);
 	switch(type) {
-	case BLOBMSG_TYPE_STRING:
-		indent_printf(indent, "%s\n", blobmsg_get_string(data));
+	case BLOB_ATTR_STRING:
+		indent_printf(indent, "%s\n", blob_attr_get_string(data));
 		break;
-	case BLOBMSG_TYPE_INT8:
-		indent_printf(indent, "%d\n", blobmsg_get_u8(data));
+	case BLOB_ATTR_INT8:
+		indent_printf(indent, "%d\n", blob_attr_get_u8(data));
 		break;
-	case BLOBMSG_TYPE_INT16:
-		indent_printf(indent, "%d\n", blobmsg_get_u16(data));
+	case BLOB_ATTR_INT16:
+		indent_printf(indent, "%d\n", blob_attr_get_u16(data));
 		break;
-	case BLOBMSG_TYPE_INT32:
-		indent_printf(indent, "%d\n", blobmsg_get_u32(data));
+	case BLOB_ATTR_INT32:
+		indent_printf(indent, "%d\n", blob_attr_get_u32(data));
 		break;
-	case BLOBMSG_TYPE_INT64:
-		indent_printf(indent, "%"PRIu64"\n", blobmsg_get_u64(data));
+	case BLOB_ATTR_INT64:
+		indent_printf(indent, "%"PRIu64"\n", blob_attr_get_u64(data));
 		break;
-	case BLOBMSG_TYPE_FLOAT32: 
-		indent_printf(indent, "%f\n", blobmsg_get_f32(data)); 
+	case BLOB_ATTR_FLOAT32: 
+		indent_printf(indent, "%f\n", blob_attr_get_float(data)); 
 		break; 
-	case BLOBMSG_TYPE_FLOAT64: 
-		indent_printf(indent, "%Le\n", blobmsg_get_f64(data)); 
+	case BLOB_ATTR_FLOAT64: 
+		indent_printf(indent, "%Le\n", (long double) blob_attr_get_double(data)); 
 		break; 
-	case BLOBMSG_TYPE_TABLE:
-	case BLOBMSG_TYPE_ARRAY:
+	case BLOB_ATTR_TABLE:
+	case BLOB_ATTR_ARRAY:
 		if (!indent)
 			indent_printf(indent, "\n");
-		dump_table(data, blobmsg_data_len(data),
-			   next_indent, type == BLOBMSG_TYPE_ARRAY);
+		//dump_table(data, blob_data_len(data),
+		//		   next_indent, type == BLOBMSG_TYPE_ARRAY);
 		break;
 	}
 }
@@ -70,18 +67,18 @@ enum {
 	FOO_TESTDATA
 };
 
-static const struct blobmsg_policy pol[] = {
+static const struct blob_attr_policy pol[] = {
 	[FOO_MESSAGE] = {
 		.name = "message",
-		.type = BLOBMSG_TYPE_STRING,
+		.type = BLOB_ATTR_STRING,
 	},
 	[FOO_LIST] = {
 		.name = "list",
-		.type = BLOBMSG_TYPE_ARRAY,
+		.type = BLOB_ATTR_ARRAY,
 	},
 	[FOO_TESTDATA] = {
 		.name = "testdata",
-		.type = BLOBMSG_TYPE_TABLE,
+		.type = BLOB_ATTR_TABLE,
 	},
 };
 
@@ -91,9 +88,9 @@ static const struct blobmsg_policy pol[] = {
 
 static void dump_message(struct blob_buf *buf)
 {
-	struct blob_attr *tb[ARRAY_SIZE(pol)];
+	//struct blob_attr *tb[ARRAY_SIZE(pol)];
 
-	if (blobmsg_parse(buf, pol, ARRAY_SIZE(pol), tb) != 0) {
+	/*if (blob_parse(buf, pol, ARRAY_SIZE(pol), tb) != 0) {
 		fprintf(stderr, "Parse failed\n");
 		return;
 	}
@@ -107,7 +104,7 @@ static void dump_message(struct blob_buf *buf)
 	if (tb[FOO_TESTDATA]) {
 		fprintf(stderr, "Testdata: ");
 		dump_table(tb[FOO_TESTDATA], blobmsg_data_len(tb[FOO_TESTDATA]), 0, false);
-	}
+	}*/
 }
 
 static void
@@ -118,23 +115,23 @@ fill_message(struct blob_buf *buf)
 	//blob_buf_put_u32(buf, BLOB_ATTR_INT32, 0xbe); 
 	//blob_buf_put_string(buf, BLOB_ATTR_STRING, "a string"); 
 
-	void *root = blobmsg_open_table(buf, NULL); 
+	void *root = blob_buf_open_table(buf, NULL); 
 
-	blobmsg_add_string(buf, "message", "Hello, world!");
+	blob_buf_put_string(buf, "message", "Hello, world!");
 
-	tbl = blobmsg_open_table(buf, "testdata");
-	blobmsg_add_u32(buf, "hello", 1);
-	blobmsg_add_string(buf, "world", "2");
-	blobmsg_close_table(buf, tbl);
+	tbl = blob_buf_open_table(buf, "testdata");
+	blob_buf_put_u32(buf, "hello", 1);
+	blob_buf_put_string(buf, "world", "2");
+	blob_buf_close_table(buf, tbl);
 
-	tbl = blobmsg_open_array(buf, "list");
-	blobmsg_add_u32(buf, NULL, 0);
-	blobmsg_add_u32(buf, NULL, 1);
-	blobmsg_add_u32(buf, NULL, 2);
-	blobmsg_add_f32(buf, NULL, 0.123);
-	blobmsg_close_array(buf, tbl);
+	tbl = blob_buf_open_array(buf, "list");
+	blob_buf_put_u32(buf, NULL, 0);
+	blob_buf_put_u32(buf, NULL, 1);
+	blob_buf_put_u32(buf, NULL, 2);
+	blob_buf_put_float(buf, NULL, 0.123);
+	blob_buf_close_array(buf, tbl);
 
-	blobmsg_close_table(buf, root); 
+	blob_buf_close_table(buf, root); 
 }
 
 int main(int argc, char **argv)
@@ -146,9 +143,8 @@ int main(int argc, char **argv)
 		blob_buf_reset(&buf); 
 		fill_message(&buf);
 		blob_buf_dump(&buf); 
-		blobmsg_dump(&buf); 
 		dump_message(&buf);
-		char *json = blobmsg_format_json(blob_buf_first(&buf), false); 
+		char *json = blob_buf_format_json(blob_buf_head(&buf), false); 
 	 	printf("json: %s\n", json);
 		free(json); 
 	}

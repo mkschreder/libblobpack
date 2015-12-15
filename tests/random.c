@@ -5,12 +5,12 @@ enum {
 	FIELD_INT32, 
 	FIELD_MAX
 } ; 
-
-static struct blobmsg_policy policy[FIELD_MAX] = {
-	[FIELD_STRING] = { .name = "string", .type = BLOBMSG_TYPE_STRING }, 
-	[FIELD_INT32] = { .name = "int32", .type = BLOBMSG_TYPE_INT32 }
+/*
+static struct blob_attr_policy policy[FIELD_MAX] = {
+	[FIELD_STRING] = { .name = "string", .type = BLOB_ATTR_STRING }, 
+	[FIELD_INT32] = { .name = "int32", .type = BLOB_ATTR_INT32 }
 }; 
-
+*/
 int main(int argc, char **argv){
 	struct blob_buf buf; 
 	char data[256]; 
@@ -27,23 +27,23 @@ int main(int argc, char **argv){
 	struct blob_buf b; 
 	blob_buf_init(&b, 0, 0); 
 
-	blobmsg_add_string(&b, "string", "foo"); 
-	blobmsg_add_u32(&b, "int32", 123); 
+	blob_buf_put_string(&b, "string", "foo"); 
+	blob_buf_put_u32(&b, "int32", 123); 
 
 	printf("raw len: %u\n", (uint32_t)blob_buf_size(&b)); 
 	blob_buf_init(&buf, data, 256); 
 	struct blob_attr *out[FIELD_MAX]; 
-
-	if(-1 == blobmsg_parse(&buf, policy, FIELD_MAX, out)){
+/*
+	if(-1 == blob_buf_parse(&buf, policy, FIELD_MAX, out)){
 		printf("Error parsing blob!\n"); 
 	}
-	
+*/	
 	if(!out[FIELD_STRING]) printf("OK! no string field!\n"); 
 	if(!out[FIELD_INT32]) printf("OK! no int field!\n"); 
 
 	printf("Data: \n"); 
-	printf("string: %s\n", (char*)blobmsg_data(out[FIELD_STRING])); 
-	printf("int32: %d\n", blobmsg_get_u32(out[FIELD_INT32])); 
+	printf("string: %s\n", (char*)blob_attr_data(out[FIELD_STRING])); 
+	printf("int32: %d\n", blob_attr_get_u32(out[FIELD_INT32])); 
 
 	return 0; 
 }

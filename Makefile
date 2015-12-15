@@ -4,7 +4,7 @@ SOURCE:=$(wildcard *.c)
 HEADERS:=$(wildcard *.h)
 OBJECTS:=$(patsubst %.c,%.o,$(SOURCE))
 LDFLAGS+=-ljson-c
-CFLAGS+=-Werror -Wall -std=gnu99 -fPIC
+CFLAGS+=-Werror -Wall -Wno-unused-function -std=gnu99 -fPIC
 INSTALL_PREFIX:=/usr
 
 STATIC_LIB:=lib$(PACKAGE_NAME).a

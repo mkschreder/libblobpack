@@ -22,7 +22,8 @@
 bool blob_buf_add_object(struct blob_buf *b, json_object *obj)
 {
 	json_object_object_foreach(obj, key, val) {
-		if (!blob_buf_add_json_element(b, key, val))
+		blob_buf_put_string(b, key); 
+		if (!blob_buf_add_json_element(b, val))
 			return false;
 	}
 	return true;
@@ -33,14 +34,14 @@ static bool blob_buf_add_array(struct blob_buf *b, struct array_list *a)
 	int i, len;
 
 	for (i = 0, len = array_list_length(a); i < len; i++) {
-		if (!blob_buf_add_json_element(b, NULL, array_list_get_idx(a, i)))
+		if (!blob_buf_add_json_element(b, array_list_get_idx(a, i)))
 			return false;
 	}
 
 	return true;
 }
 
-bool blob_buf_add_json_element(struct blob_buf *b, const char *name, json_object *obj)
+bool blob_buf_add_json_element(struct blob_buf *b, json_object *obj)
 {
 	bool ret = true;
 	void *c;
@@ -50,23 +51,23 @@ bool blob_buf_add_json_element(struct blob_buf *b, const char *name, json_object
 
 	switch (json_object_get_type(obj)) {
 	case json_type_object:
-		c = blob_buf_open_table(b, name);
+		c = blob_buf_open_table(b);
 		ret = blob_buf_add_object(b, obj);
 		blob_buf_close_table(b, c);
 		break;
 	case json_type_array:
-		c = blob_buf_open_array(b, name);
+		c = blob_buf_open_array(b);
 		ret = blob_buf_add_array(b, json_object_get_array(obj));
 		blob_buf_close_array(b, c);
 		break;
 	case json_type_string:
-		blob_buf_put_string(b, name, json_object_get_string(obj));
+		blob_buf_put_string(b, json_object_get_string(obj));
 		break;
 	case json_type_boolean:
-		blob_buf_put_u8(b, name, json_object_get_boolean(obj));
+		blob_buf_put_u8(b, json_object_get_boolean(obj));
 		break;
 	case json_type_int:
-		blob_buf_put_u32(b, name, json_object_get_int(obj));
+		blob_buf_put_u32(b, json_object_get_int(obj));
 		break;
 	default:
 		return false;
@@ -81,23 +82,20 @@ static bool __blob_buf_add_json(struct blob_buf *b, json_object *obj)
 	if (!obj)
 		return false;
 
-	if (json_object_get_type(obj) != json_type_object)
-		goto out;
-
-	ret = blob_buf_add_object(b, obj);
-
-out:
+	if (json_object_get_type(obj) == json_type_object){
+		ret = blob_buf_add_object(b, obj);
+	} else {
+		ret = blob_buf_add_array(b, json_object_get_array(obj)); 
+	}
 	json_object_put(obj);
 	return ret;
 }
 
-bool blob_buf_add_json_from_file(struct blob_buf *b, const char *file)
-{
+bool blob_buf_add_json_from_file(struct blob_buf *b, const char *file){
 	return __blob_buf_add_json(b, json_object_from_file(file));
 }
 
-bool blob_buf_add_json_from_string(struct blob_buf *b, const char *str)
-{
+bool blob_buf_add_json_from_string(struct blob_buf *b, const char *str){
 	return __blob_buf_add_json(b, json_tokener_parse(str));
 }
 
@@ -216,11 +214,6 @@ static void blob_buf_format_element(struct strbuf *s, struct blob_attr *attr, bo
 	//if (!blob_buf_check_attr(attr, false))
 	//		return;
 
-	if (!array && blob_attr_name(attr)[0]) {
-		blob_buf_format_string(s, blob_attr_name(attr));
-		blob_buf_puts(s, ": ", s->indent ? 2 : 1);
-	}
-
 	data = blob_attr_data(attr);
 
 	if (!head && s->custom_format) {
@@ -280,6 +273,12 @@ static void blob_buf_format_json_list(struct strbuf *s, struct blob_attr *attr, 
 		if (!first) {
 			blob_buf_puts(s, ",", 1);
 			add_separator(s);
+		}
+		
+		if(!array){
+			blob_buf_format_string(s, blob_attr_data(pos)); 
+			blob_buf_puts(s, ": ", s->indent ? 2 : 1);
+			pos = blob_attr_next_child(attr, pos); 
 		}
 
 		blob_buf_format_element(s, pos, array, false);

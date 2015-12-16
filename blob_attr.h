@@ -56,7 +56,7 @@ blob_attr_has_name(const struct blob_attr *attr){
 	return !!(attr->id_len & cpu_to_be32(BLOB_ATTR_HAS_NAME));
 }
 
-const char *blob_attr_name(struct blob_attr *attr); 
+//const char *blob_attr_name(struct blob_attr *attr); 
 
 /*
  * blob_raw_len: returns the complete length of an attribute (including the header)
@@ -117,32 +117,32 @@ blob_attr_get_u64(const struct blob_attr *attr){
 }
 
 static inline int8_t
-blob_attr_get_int8(const struct blob_attr *attr){
+blob_attr_get_i8(const struct blob_attr *attr){
 	if(!attr) return 0; 
 	return blob_attr_get_u8(attr);
 }
 
 static inline int16_t
-blob_attr_get_int16(const struct blob_attr *attr){
+blob_attr_get_i16(const struct blob_attr *attr){
 	if(!attr) return 0; 
 	return blob_attr_get_u16(attr);
 }
 
 static inline int32_t
-blob_attr_get_int32(const struct blob_attr *attr){
+blob_attr_get_i32(const struct blob_attr *attr){
 	if(!attr) return 0; 
 	return blob_attr_get_u32(attr);
 }
 
 static inline int64_t
-blob_attr_get_int64(const struct blob_attr *attr){
+blob_attr_get_i64(const struct blob_attr *attr){
 	if(!attr) return 0; 
 	return blob_attr_get_u64(attr);
 }
 
 static inline const char *
 blob_attr_get_string(const struct blob_attr *attr){
-	if(!attr) return ""; 
+	if(!attr) return "(nil)"; 
 	return attr->data;
 }
 
@@ -158,12 +158,13 @@ double blob_attr_get_double(const struct blob_attr *attr);
 extern void blob_attr_fill_pad(struct blob_attr *attr);
 extern void blob_attr_set_raw_len(struct blob_attr *attr, unsigned int len);
 extern bool blob_attr_equal(const struct blob_attr *a1, const struct blob_attr *a2);
-extern int blob_attr_parse(struct blob_attr *attr, struct blob_attr **data, const struct blob_attr_info *info, int max);
+extern int blob_attr_parse(struct blob_attr *attr, struct blob_attr **data, const struct blob_attr_policy *info, int max);
 extern struct blob_attr *blob_attr_memdup(struct blob_attr *attr);
 extern bool blob_attr_check_type(const void *ptr, unsigned int len, int type);
 
 static inline struct blob_attr *blob_attr_first_child(const struct blob_attr *self){
 	assert(self); 
+	if(blob_attr_raw_len(self) <= sizeof(struct blob_attr)) return NULL; 
 	return (struct blob_attr*)blob_attr_data(self); 
 }
 
@@ -176,3 +177,4 @@ static inline struct blob_attr *blob_attr_next_child(const struct blob_attr *sel
 	return ret; 
 }
 
+void blob_attr_dump(struct blob_attr *self); 

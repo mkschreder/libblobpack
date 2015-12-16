@@ -10,11 +10,11 @@ static const int blob_type_minlen[BLOB_ATTR_LAST] = {
 	[BLOB_ATTR_INT64] = sizeof(uint64_t),
 };
 
-const char *blob_attr_name(struct blob_attr *attr){
+/*const char *blob_attr_name(struct blob_attr *attr){
 	if(!blob_attr_has_name(attr)) return ""; 
 	struct blob_name_hdr *hdr = (struct blob_name_hdr*)attr->data; 
 	return (char*)hdr->name; 
-}
+}*/
 
 bool blob_attr_check_type(const void *ptr, unsigned int len, int type){
 	const char *data = ptr;
@@ -36,7 +36,7 @@ bool blob_attr_check_type(const void *ptr, unsigned int len, int type){
 	return true;
 }
 
-int blob_attr_parse(struct blob_attr *attr, struct blob_attr **data, const struct blob_attr_info *info, int max){
+int blob_attr_parse(struct blob_attr *attr, struct blob_attr **data, const struct blob_attr_policy *info, int max){
 	int found = 0;
 
 	memset(data, 0, sizeof(struct blob_attr *) * max);
@@ -55,7 +55,7 @@ int blob_attr_parse(struct blob_attr *attr, struct blob_attr **data, const struc
 				if (!blob_attr_check_type(blob_attr_data(pos), len, type))
 					continue;
 			}
-
+/*
 			if (info[id].minlen && len < info[id].minlen)
 				continue;
 
@@ -63,7 +63,7 @@ int blob_attr_parse(struct blob_attr *attr, struct blob_attr **data, const struc
 				continue;
 
 			if (info[id].validate && !info[id].validate(&info[id], pos))
-				continue;
+				continue;*/
 		}
 
 		if (!data[id])

@@ -98,13 +98,13 @@ void blob_buf_free(struct blob_buf *buf){
 	buf->memlen = 0;
 }
 
-static struct blob_attr *blob_buf_new_attr(struct blob_buf *buf, int id, const char *name, int payload){
-	int namelen = 0; 
+static struct blob_attr *blob_buf_new_attr(struct blob_buf *buf, int id, int payload){
+	//int namelen = 0; 
 	int attr_raw_len = sizeof(struct blob_attr) + payload; 
-	if(name) {
+	/*if(name) {
 		namelen = strlen(name)+1; 
 		attr_raw_len += blob_name_hdrlen(namelen);
-	}
+	}*/
 	int attr_pad_len = attr_raw_len + (BLOB_ATTR_ALIGN - ( attr_raw_len % BLOB_ATTR_ALIGN)) % BLOB_ATTR_ALIGN; 
 
 	struct blob_attr *head = blob_buf_head(buf); 
@@ -127,23 +127,23 @@ static struct blob_attr *blob_buf_new_attr(struct blob_buf *buf, int id, const c
 	// update the length of the head element to enclose the whole buffer
 	blob_attr_set_raw_len(blob_buf_head(buf), req_len); 
 
-	if(name){
+	/*if(name){
 		attr->id_len |= be32_to_cpu(BLOB_ATTR_HAS_NAME);
 		struct blob_name_hdr *hdr = (struct blob_name_hdr*)attr->data; 
 		hdr->namelen = cpu_to_be16(namelen);
 		strncpy((char *) hdr->name, (const char *)name, namelen);
-	}
+	}*/
 
 	return attr;
 }
 
-struct blob_attr *blob_buf_put_binary(struct blob_buf *buf, const char *name, const void *ptr, unsigned int len){
+struct blob_attr *blob_buf_put_binary(struct blob_buf *buf, const void *ptr, unsigned int len){
 	struct blob_attr *attr;
 
 	if (len < sizeof(struct blob_attr) || !ptr)
 		return NULL;
 
-	attr = blob_buf_new_attr(buf, BLOB_ATTR_BINARY, name, len - sizeof(struct blob_attr));
+	attr = blob_buf_new_attr(buf, BLOB_ATTR_BINARY, len - sizeof(struct blob_attr));
 	if (!attr)
 		return NULL;
 
@@ -151,10 +151,10 @@ struct blob_attr *blob_buf_put_binary(struct blob_buf *buf, const char *name, co
 	return attr;
 }
 
-struct blob_attr *blob_buf_put(struct blob_buf *buf, int id, const char *name, const void *ptr, unsigned int len){
+static struct blob_attr *blob_buf_put(struct blob_buf *buf, int id, const void *ptr, unsigned int len){
 	struct blob_attr *attr;
 
-	attr = blob_buf_new_attr(buf, id, name, len);
+	attr = blob_buf_new_attr(buf, id, len);
 	if (!attr) {
 		return NULL;
 	}
@@ -165,31 +165,31 @@ struct blob_attr *blob_buf_put(struct blob_buf *buf, int id, const char *name, c
 	return attr;
 }
 
-struct blob_attr *blob_buf_put_string(struct blob_buf *buf, const char *name, const char *str){
-	return blob_buf_put(buf, BLOB_ATTR_STRING, name, str, strlen(str) + 1);
+struct blob_attr *blob_buf_put_string(struct blob_buf *buf, const char *str){
+	return blob_buf_put(buf, BLOB_ATTR_STRING, str, strlen(str) + 1);
 }
 
-struct blob_attr *blob_buf_put_u8(struct blob_buf *buf, const char *name, uint8_t val){
-	return blob_buf_put(buf, BLOB_ATTR_INT8, name, &val, sizeof(val));
+struct blob_attr *blob_buf_put_u8(struct blob_buf *buf, uint8_t val){
+	return blob_buf_put(buf, BLOB_ATTR_INT8, &val, sizeof(val));
 }
 
-struct blob_attr *blob_buf_put_u16(struct blob_buf *buf, const char *name, uint16_t val){
+struct blob_attr *blob_buf_put_u16(struct blob_buf *buf, uint16_t val){
 	val = cpu_to_be16(val);
-	return blob_buf_put(buf, BLOB_ATTR_INT16, name, &val, sizeof(val));
+	return blob_buf_put(buf, BLOB_ATTR_INT16, &val, sizeof(val));
 }
 
-struct blob_attr *blob_buf_put_u32(struct blob_buf *buf, const char *name, uint32_t val){
+struct blob_attr *blob_buf_put_u32(struct blob_buf *buf, uint32_t val){
 	val = cpu_to_be32(val);
-	return blob_buf_put(buf, BLOB_ATTR_INT32, name, &val, sizeof(val));
+	return blob_buf_put(buf, BLOB_ATTR_INT32, &val, sizeof(val));
 }
 
-struct blob_attr *blob_buf_put_u64(struct blob_buf *buf, const char *name, uint64_t val){
+struct blob_attr *blob_buf_put_u64(struct blob_buf *buf, uint64_t val){
 	val = cpu_to_be64(val);
-	return blob_buf_put(buf, BLOB_ATTR_INT64, name, &val, sizeof(val));
+	return blob_buf_put(buf, BLOB_ATTR_INT64, &val, sizeof(val));
 }
 
-blob_offset_t blob_buf_open_array(struct blob_buf *buf, const char *name){
-	struct blob_attr *attr = blob_buf_new_attr(buf, BLOB_ATTR_ARRAY, name, 0);
+blob_offset_t blob_buf_open_array(struct blob_buf *buf){
+	struct blob_attr *attr = blob_buf_new_attr(buf, BLOB_ATTR_ARRAY, 0);
 	return blob_buf_attr_to_offset(buf, attr);
 }
 
@@ -199,8 +199,8 @@ void blob_buf_close_array(struct blob_buf *buf, blob_offset_t offset){
 	blob_attr_set_raw_len(attr, len);
 }
 
-blob_offset_t blob_buf_open_table(struct blob_buf *buf, const char *name){
-	struct blob_attr *attr = blob_buf_new_attr(buf, BLOB_ATTR_TABLE, name, 0);
+blob_offset_t blob_buf_open_table(struct blob_buf *buf){
+	struct blob_attr *attr = blob_buf_new_attr(buf, BLOB_ATTR_TABLE, 0);
 	return blob_buf_attr_to_offset(buf, attr);
 }
 
@@ -211,17 +211,34 @@ void blob_buf_close_table(struct blob_buf *buf, blob_offset_t offset){
 }
 
 
-struct blob_attr *blob_buf_put_float(struct blob_buf *buf, const char *name, float value){
+struct blob_attr *blob_buf_put_float(struct blob_buf *buf, float value){
 	uint32_t val = cpu_to_be32(pack754_32(value));  
-	return blob_buf_put(buf, BLOB_ATTR_FLOAT32, name, &val, sizeof(val)); 
+	return blob_buf_put(buf, BLOB_ATTR_FLOAT32, &val, sizeof(val)); 
 }
  
-struct blob_attr *blob_buf_put_double(struct blob_buf *buf, const char *name, double value){
+struct blob_attr *blob_buf_put_double(struct blob_buf *buf, double value){
 	uint64_t val = cpu_to_be64(pack754_64(value));  
-	return blob_buf_put(buf, BLOB_ATTR_FLOAT64, name, &val, sizeof(val));
+	return blob_buf_put(buf, BLOB_ATTR_FLOAT64, &val, sizeof(val));
 } 
 
-static void __attribute__((unused)) _blob_attr_dump(struct blob_buf *self, struct blob_attr *node, int indent){
+struct blob_attr *blob_buf_put_attr(struct blob_buf *buf, struct blob_attr *attr){
+	struct blob_attr *head = blob_buf_head(buf); 
+	int cur_len = blob_attr_pad_len(head); 
+	int attr_pad_len = blob_attr_pad_len(attr); 
+	int req_len = cur_len + attr_pad_len;  
+
+	if (!blob_buf_resize(buf, req_len))
+		return NULL;
+	
+	struct blob_attr *ret = (struct blob_attr*)(buf->buf + cur_len); 
+	memcpy(ret, attr, attr_pad_len);
+
+	blob_attr_set_raw_len(blob_buf_head(buf), req_len); 
+
+	return ret; 
+}
+
+static void __attribute__((unused)) _blob_attr_dump(struct blob_attr *node, int indent){
 	/*if(blob_attr_type(node) == BLOB_ATTR_ARRAY || blob_attr_type(node) == BLOB_ATTR_TABLE){
 		printf(">>\n"); 
 		_blob_attr_dump(self, attr, blob_attr_data(attr)); 
@@ -254,14 +271,14 @@ static void __attribute__((unused)) _blob_attr_dump(struct blob_buf *self, struc
 
 		int offset = (node)?((int)((char*)attr - (char*)node)):0; 
 		for(int c = 0; c < indent; c++) printf("\t"); 
-		printf("[ field [%s] (", blob_attr_name(attr)); 
+		printf("[ field ("); 
 		for(int c = 0; c < sizeof(struct blob_attr); c++){
 			printf("%02x", (int)*((char*)attr + c) & 0xff); 
 		}
 		printf(") type=%s offset=%d padlen: %d, rawlen: %d ]\n", names[(id < BLOB_ATTR_LAST)?id:0], offset, len, blob_attr_raw_len(attr)); 
 
 		if(id == BLOB_ATTR_ARRAY || id == BLOB_ATTR_TABLE) {
-			_blob_attr_dump(self, attr, indent+1); 
+			_blob_attr_dump(attr, indent+1); 
 			continue; 
 		}
 
@@ -275,11 +292,17 @@ static void __attribute__((unused)) _blob_attr_dump(struct blob_buf *self, struc
 	}
 }
 
+void blob_attr_dump(struct blob_attr *self){
+	_blob_attr_dump(self, 0); 
+}
+
 void blob_buf_dump(struct blob_buf *self){
 	if(!self) return; 
 
 	printf("=========== blob ===========\n"); 
 	printf("size: %lu, memory: %lu\n", blob_buf_size(self), self->memlen);
-	_blob_attr_dump(self, blob_buf_head(self), 0); 
+	for(int c = 0; c < 8; c++) printf("%02x ", ((char*)self->buf)[c] & 0xff); 
+	printf("\n"); 
+	_blob_attr_dump(blob_buf_head(self), 0); 
 	printf("============================\n"); 
 }

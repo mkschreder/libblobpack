@@ -20,8 +20,10 @@ dump_table(struct blob_attr *head, int len, int indent, bool array)
 
 	indent_printf(indent, "{\n");
 	for(attr = blob_attr_first_child(head); attr; attr = blob_attr_next_child(head, attr)){
-		if (!array)
-			indent_printf(indent + 1, "%s : ", blob_attr_name(attr));
+		if (!array){
+			indent_printf(indent + 1, "%s : ", blob_attr_get_string(attr));
+			attr = blob_attr_next_child(head, attr); 
+		}
 		dump_attr_data(attr, 0, indent + 1);
 	}
 	indent_printf(indent, "}\n");
@@ -115,20 +117,25 @@ fill_message(struct blob_buf *buf)
 	//blob_buf_put_u32(buf, BLOB_ATTR_INT32, 0xbe); 
 	//blob_buf_put_string(buf, BLOB_ATTR_STRING, "a string"); 
 
-	void *root = blob_buf_open_table(buf, NULL); 
+	void *root = blob_buf_open_table(buf); 
+	
+	blob_buf_put_string(buf, "message"); 
+	blob_buf_put_string(buf, "Hello, world!");
 
-	blob_buf_put_string(buf, "message", "Hello, world!");
-
-	tbl = blob_buf_open_table(buf, "testdata");
-	blob_buf_put_u32(buf, "hello", 1);
-	blob_buf_put_string(buf, "world", "2");
+	blob_buf_put_string(buf, "testtable"); 
+	tbl = blob_buf_open_table(buf);
+	blob_buf_put_string(buf, "hello"); 
+	blob_buf_put_u32(buf, 1);
+	blob_buf_put_string(buf, "world"); 
+	blob_buf_put_string(buf, "2");
 	blob_buf_close_table(buf, tbl);
 
-	tbl = blob_buf_open_array(buf, "list");
-	blob_buf_put_u32(buf, NULL, 0);
-	blob_buf_put_u32(buf, NULL, 1);
-	blob_buf_put_u32(buf, NULL, 2);
-	blob_buf_put_float(buf, NULL, 0.123);
+	blob_buf_put_string(buf, "list"); 
+	tbl = blob_buf_open_array(buf);
+	blob_buf_put_u32(buf, 0);
+	blob_buf_put_u32(buf, 1);
+	blob_buf_put_u32(buf, 2);
+	blob_buf_put_float(buf, 0.123);
 	blob_buf_close_array(buf, tbl);
 
 	blob_buf_close_table(buf, root); 
@@ -148,6 +155,11 @@ int main(int argc, char **argv)
 	 	printf("json: %s\n", json);
 		free(json); 
 	}
+	
+	blob_buf_reset(&buf); 
+	//blob_buf_add_json_from_string(&buf, "{\"string\":\"Hello World\",\"array\":[1,2,3,4],\"object\":{\"foo\":\"bar\"}}"); 
+	blob_buf_add_json_from_string(&buf, "[123,2,3,4]"); 
+	blob_buf_dump(&buf); 
 
 	fflush(stdout); 
 	blob_buf_free(&buf); 

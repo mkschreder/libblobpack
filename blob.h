@@ -79,11 +79,11 @@ typedef void* blob_offset_t;
 ********************************/
 
 //! opens an array element
-blob_offset_t 	blob_buf_open_array(struct blob_buf *buf, const char *name);
+blob_offset_t 	blob_buf_open_array(struct blob_buf *buf);
 //! closes an array element
 void 			blob_buf_close_array(struct blob_buf *buf, blob_offset_t);
 //! opens an table element
-blob_offset_t 	blob_buf_open_table(struct blob_buf *buf, const char *name);
+blob_offset_t 	blob_buf_open_table(struct blob_buf *buf);
 //! closes an table element
 void 			blob_buf_close_table(struct blob_buf *buf, blob_offset_t);
 
@@ -92,19 +92,21 @@ void 			blob_buf_close_table(struct blob_buf *buf, blob_offset_t);
 ********************************/
 
 //! Write a string at the end of the buffer 
-struct blob_attr *blob_buf_put_string(struct blob_buf *buf, const char *name, const char *str); 
-struct blob_attr *blob_buf_put_u8(struct blob_buf *buf, const char *name, uint8_t val); 
-struct blob_attr *blob_buf_put_u16(struct blob_buf *buf, const char *name, uint16_t val); 
-struct blob_attr *blob_buf_put_u32(struct blob_buf *buf, const char *name, uint32_t val); 
-struct blob_attr *blob_buf_put_u64(struct blob_buf *buf, const char *name, uint64_t val); 
+struct blob_attr *blob_buf_put_string(struct blob_buf *buf, const char *str); 
+struct blob_attr *blob_buf_put_u8(struct blob_buf *buf, uint8_t val); 
+struct blob_attr *blob_buf_put_u16(struct blob_buf *buf, uint16_t val); 
+struct blob_attr *blob_buf_put_u32(struct blob_buf *buf, uint32_t val); 
+struct blob_attr *blob_buf_put_u64(struct blob_buf *buf, uint64_t val); 
 
 #define blob_buf_put_i8		blob_buf_put_u8
 #define blob_buf_put_i16	blob_buf_put_u16
 #define blob_buf_put_i32	blob_buf_put_u32
 #define blob_buf_put_i64	blob_buf_put_u64
 
-struct blob_attr *blob_buf_put_float(struct blob_buf *buf, const char *name, float value); 
-struct blob_attr *blob_buf_put_double(struct blob_buf *buf, const char *name, double value); 
+struct blob_attr *blob_buf_put_float(struct blob_buf *buf, float value); 
+struct blob_attr *blob_buf_put_double(struct blob_buf *buf, double value); 
+
+struct blob_attr *blob_buf_put_attr(struct blob_buf *buf, struct blob_attr *attr); 
 
 //! print out the whole buffer 
 void blob_buf_dump(struct blob_buf *self); 

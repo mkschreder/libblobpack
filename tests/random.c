@@ -27,8 +27,8 @@ int main(int argc, char **argv){
 	struct blob_buf b; 
 	blob_buf_init(&b, 0, 0); 
 
-	blob_buf_put_string(&b, "string", "foo"); 
-	blob_buf_put_u32(&b, "int32", 123); 
+	blob_buf_put_string(&b, "foo"); 
+	blob_buf_put_u32(&b, 123); 
 
 	printf("raw len: %u\n", (uint32_t)blob_buf_size(&b)); 
 	blob_buf_init(&buf, data, 256); 

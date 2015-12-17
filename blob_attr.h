@@ -50,6 +50,12 @@ static inline unsigned int blob_attr_type(const struct blob_attr *attr){
 	return id;
 }
 
+static inline void blob_attr_set_type(struct blob_attr *self, int type){
+	int id_len = be32_to_cpu(self->id_len); 
+	id_len = (id_len & ~BLOB_ATTR_ID_MASK) | (type << BLOB_ATTR_ID_SHIFT); 	
+	self->id_len = cpu_to_be32(id_len);
+}
+
 static inline bool
 blob_attr_has_name(const struct blob_attr *attr){
 	if(!attr) return false; 

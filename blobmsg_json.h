@@ -40,4 +40,10 @@ static inline char *blob_buf_format_json_indent(struct blob_attr *attr, bool lis
 	return blob_buf_format_json_with_cb(attr, list, NULL, NULL, indent);
 }
 
+static inline void blob_attr_dump_json(struct blob_attr *self){
+	char *json = blob_buf_format_json(self, true); 
+	printf("%s\n", json); 
+	free(json); 
+}
+
 #endif

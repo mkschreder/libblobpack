@@ -239,13 +239,6 @@ struct blob_attr *blob_buf_put_attr(struct blob_buf *buf, struct blob_attr *attr
 }
 
 static void __attribute__((unused)) _blob_attr_dump(struct blob_attr *node, int indent){
-	/*if(blob_attr_type(node) == BLOB_ATTR_ARRAY || blob_attr_type(node) == BLOB_ATTR_TABLE){
-		printf(">>\n"); 
-		_blob_attr_dump(self, attr, blob_attr_data(attr)); 
-		printf("<<\n"); 
-		return; 
-	}*/
-
 	static const char *names[] = {
 		[BLOB_ATTR_ROOT] = "BLOB_ATTR_ROOT",
 		//[BLOB_ATTR_NESTED] = "BLOB_ATTR_NESTED",

@@ -85,10 +85,9 @@ blob_attr_len(const struct blob_attr *attr){
 /*
  * blob_pad_len: returns the padded length of an attribute (including the header)
  */
-static inline unsigned int
-blob_attr_pad_len(const struct blob_attr *attr){
+static inline uint32_t blob_attr_pad_len(const struct blob_attr *attr){
 	if(!attr) return 0; 
-	unsigned int len = blob_attr_raw_len(attr);
+	uint32_t len = blob_attr_raw_len(attr);
 	len = (len + BLOB_ATTR_ALIGN - 1) & ~(BLOB_ATTR_ALIGN - 1);
 	return len;
 }
@@ -111,6 +110,13 @@ blob_attr_get_u32(const struct blob_attr *attr){
 	if(!attr) return 0; 
 	uint32_t *tmp = (uint32_t*)attr->data;
 	return be32_to_cpu(*tmp);
+}
+
+static inline void
+blob_attr_set_u32(const struct blob_attr *attr, uint32_t val){
+	if(!attr) return; 
+	uint32_t *tmp = (uint32_t*)attr->data;
+	*tmp = cpu_to_be32(val); 
 }
 
 static inline uint64_t
@@ -138,6 +144,12 @@ static inline int32_t
 blob_attr_get_i32(const struct blob_attr *attr){
 	if(!attr) return 0; 
 	return blob_attr_get_u32(attr);
+}
+
+static inline void
+blob_attr_set_i32(const struct blob_attr *attr, int32_t val){
+	if(!attr) return; 
+	blob_attr_set_u32(attr, val);
 }
 
 static inline int64_t
@@ -184,3 +196,5 @@ static inline struct blob_attr *blob_attr_next_child(const struct blob_attr *sel
 }
 
 void blob_attr_dump(struct blob_attr *self); 
+
+bool blob_attr_validate(struct blob_attr *attr, const char *signature); 

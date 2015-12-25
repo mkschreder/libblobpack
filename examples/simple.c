@@ -121,24 +121,37 @@ fill_message(struct blob_buf *buf)
 	
 	blob_buf_put_string(buf, "message"); 
 	blob_buf_put_string(buf, "Hello, world!");
-
+	
 	blob_buf_put_string(buf, "testtable"); 
 	tbl = blob_buf_open_table(buf);
-	blob_buf_put_string(buf, "hello"); 
-	blob_buf_put_u32(buf, 1);
-	blob_buf_put_string(buf, "world"); 
-	blob_buf_put_string(buf, "2");
+		blob_buf_put_string(buf, "hello"); 
+		blob_buf_put_u32(buf, 1);
+		blob_buf_put_string(buf, "world"); 
+		blob_buf_put_string(buf, "2");
 	blob_buf_close_table(buf, tbl);
-
+	blob_buf_close_table(buf, root); 
+	
 	blob_buf_put_string(buf, "list"); 
 	tbl = blob_buf_open_array(buf);
-	blob_buf_put_u32(buf, 0);
-	blob_buf_put_u32(buf, 1);
-	blob_buf_put_u32(buf, 2);
-	blob_buf_put_float(buf, 0.123);
+	root = blob_buf_open_table(buf);
+		blob_buf_put_string(buf, "world"); 
+		blob_buf_put_u32(buf, 0);
+		blob_buf_put_string(buf, "world"); 
+		blob_buf_put_u32(buf, 1);
+		blob_buf_put_string(buf, "world"); 
+		blob_buf_put_u32(buf, 2);
+	blob_buf_close_table(buf, root); 
+	root = blob_buf_open_table(buf);
+		blob_buf_put_string(buf, "world"); 
+		blob_buf_put_u32(buf, 0);
+		blob_buf_put_string(buf, "world"); 
+		blob_buf_put_u32(buf, 1);
+		blob_buf_put_string(buf, "world"); 
+		blob_buf_put_u32(buf, 2);
+	blob_buf_close_table(buf, root); 
+
 	blob_buf_close_array(buf, tbl);
 
-	blob_buf_close_table(buf, root); 
 }
 
 int main(int argc, char **argv)
@@ -149,11 +162,19 @@ int main(int argc, char **argv)
 	for(int c = 0; c < 10; c++){
 		blob_buf_reset(&buf); 
 		fill_message(&buf);
+		
 		blob_buf_dump(&buf); 
 		dump_message(&buf);
 		char *json = blob_buf_format_json(blob_buf_head(&buf), false); 
 	 	printf("json: %s\n", json);
 		free(json); 
+		const char *sig = "{sv}s[{si}]"; 
+		if(!blob_attr_validate(blob_buf_head(&buf), sig)) {
+			printf("invalid signature! %s\n", sig); 
+			break; 
+		} else {
+			printf("VALIDATION OK! %s\n", sig); 
+		}
 	}
 	
 	blob_buf_reset(&buf); 

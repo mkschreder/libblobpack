@@ -223,6 +223,8 @@ static void blob_buf_format_element(struct strbuf *s, struct blob_attr *attr, bo
 	}
 
 	data_str = buf;
+	memset(buf, 0, sizeof(buf)); 
+
 	switch(blob_attr_type(attr)) {
 	case BLOB_ATTR_ROOT:
 		sprintf(buf, "null");
@@ -230,6 +232,9 @@ static void blob_buf_format_element(struct strbuf *s, struct blob_attr *attr, bo
 	//case BLOB_ATTR_BOOL:
 	//	sprintf(buf, "%s", *(uint8_t *)data ? "true" : "false");
 //		break;
+	case BLOB_ATTR_INT8: 
+		sprintf(buf, "%d", *(uint8_t*)data); 
+		break; 
 	case BLOB_ATTR_INT16:
 		sprintf(buf, "%d", be16_to_cpu(*(uint16_t *)data));
 		break;

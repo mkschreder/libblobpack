@@ -143,4 +143,58 @@ blob_attr_set_raw_len(struct blob_attr *attr, unsigned int len){
 	attr->id_len |= cpu_to_be32(len);
 }
 
+bool _blob_attr_validate(struct blob_attr *attr, const char *signature, const char **nk){
+	const char *k = signature; 
+	//printf("validating %s\n", signature); 
+	struct blob_attr *field = blob_attr_first_child(attr); 
+	while(*k && field){
+		//printf("KEY: %c\n", *k); 
+		switch(*k){
+			case '{': 
+				if(blob_attr_type(field) != BLOB_ATTR_TABLE) return false; 
+				if(!_blob_attr_validate(field, k + 1, &k)) return false; 
+				//printf("continuing at %s\n", k); 
+				break; 
+			case '}': 
+				//printf("closing\n"); 
+				if(!field) {
+					printf("exiting level\n"); 
+					if(nk) *nk = k ; 
+					return true; 
+				}
+				k = signature; 
+				continue; 
+				break; 
+			case '[': 
+				//printf("parsing array!\n"); 
+				if(blob_attr_type(field) != BLOB_ATTR_ARRAY) return false;  
+				if(!_blob_attr_validate(field, k + 1, &k)) return false; 
+				break;
+			case ']': 
+				//printf("closing array\n"); 
+				if(!field) return true; 
+				k = signature; 
+				continue; 
+				break; 
+			case 'i': 
+				if(blob_attr_type(field) != BLOB_ATTR_INT32) return false; 
+				break; 
+			case 's': 
+				//printf("%s: check %d against %d\n", blob_attr_get_string(field), blob_attr_type(field), BLOB_ATTR_STRING); 
+				if(blob_attr_type(field) != BLOB_ATTR_STRING) return false; 
+				break; 
+			case 'v': 
+				break; 
+		}
+		k++; 
+		field = blob_attr_next_child(attr, field); 
+		//printf("next field %s %d\n", k, blob_attr_type(field)); 
+	}
+	//printf("exiting at %s\n", k); 
+	if(nk) *nk = k; 
+	return true; 
+}
 
+bool blob_attr_validate(struct blob_attr *attr, const char *signature){
+	return _blob_attr_validate(attr, signature, NULL); 
+}

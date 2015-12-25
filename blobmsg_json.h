@@ -41,6 +41,7 @@ static inline char *blob_buf_format_json_indent(struct blob_attr *attr, bool lis
 }
 
 static inline void blob_attr_dump_json(struct blob_attr *self){
+	assert(self); 
 	char *json = blob_buf_format_json(self, true); 
 	printf("%s\n", json); 
 	free(json); 

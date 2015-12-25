@@ -84,9 +84,9 @@ void blob_buf_init(struct blob_buf *buf, const char *data, size_t size){
 	assert(buf->buf); 
 	
 	if(data) {
-		memcpy(blob_attr_data(blob_buf_head(buf)), data, size); 
-		blob_attr_init(blob_buf_head(buf), BLOB_ATTR_ARRAY, sizeof(struct blob_attr)); 
-		blob_attr_fill_pad(blob_buf_head(buf)); 
+		memcpy(buf->buf, data, size); 
+		//blob_attr_init(blob_buf_head(buf), BLOB_ATTR_ARRAY, sizeof(struct blob_attr)); 
+		//blob_attr_fill_pad(blob_buf_head(buf)); 
 	} else {
 		blob_buf_reset(buf); 
 	}
@@ -138,6 +138,7 @@ static struct blob_attr *blob_buf_new_attr(struct blob_buf *buf, int id, int pay
 }
 
 struct blob_attr *blob_buf_put_binary(struct blob_buf *buf, const void *ptr, unsigned int len){
+	assert(ptr); 
 	struct blob_attr *attr;
 
 	if (len < sizeof(struct blob_attr) || !ptr)
@@ -166,6 +167,7 @@ static struct blob_attr *blob_buf_put(struct blob_buf *buf, int id, const void *
 }
 
 struct blob_attr *blob_buf_put_string(struct blob_buf *buf, const char *str){
+	assert(str); 
 	return blob_buf_put(buf, BLOB_ATTR_STRING, str, strlen(str) + 1);
 }
 

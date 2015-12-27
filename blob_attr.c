@@ -36,44 +36,6 @@ bool blob_attr_check_type(const void *ptr, unsigned int len, int type){
 	return true;
 }
 
-int blob_attr_parse(struct blob_attr *attr, struct blob_attr **data, const struct blob_attr_policy *info, int max){
-	int found = 0;
-
-	memset(data, 0, sizeof(struct blob_attr *) * max);
-	//blob_buf_for_each_attr(pos, attr, rem) {
-	for(struct blob_attr *pos = blob_attr_first_child(attr); pos; pos = blob_attr_next_child(attr, pos)){ 
-		int id = blob_attr_type(pos);
-		int len = blob_attr_len(pos);
-
-		if (id >= max)
-			continue;
-
-		if (info) {
-			int type = info[id].type;
-
-			if (type < BLOB_ATTR_LAST) {
-				if (!blob_attr_check_type(blob_attr_data(pos), len, type))
-					continue;
-			}
-/*
-			if (info[id].minlen && len < info[id].minlen)
-				continue;
-
-			if (info[id].maxlen && len > info[id].maxlen)
-				continue;
-
-			if (info[id].validate && !info[id].validate(&info[id], pos))
-				continue;*/
-		}
-
-		if (!data[id])
-			found++;
-
-		data[id] = pos;
-	}
-	return found;
-}
-
 bool
 blob_attr_equal(const struct blob_attr *a1, const struct blob_attr *a2)
 {
@@ -177,11 +139,16 @@ bool _blob_attr_validate(struct blob_attr *attr, const char *signature, const ch
 				continue; 
 				break; 
 			case 'i': 
-				if(blob_attr_type(field) != BLOB_ATTR_INT32) return false; 
+				if(blob_attr_type(field) != BLOB_ATTR_INT32 && blob_attr_type(field) != BLOB_ATTR_INT8) return false; 
 				break; 
 			case 's': 
-				//printf("%s: check %d against %d\n", blob_attr_get_string(field), blob_attr_type(field), BLOB_ATTR_STRING); 
 				if(blob_attr_type(field) != BLOB_ATTR_STRING) return false; 
+				break; 
+			case 't': 
+				if(blob_attr_type(field) != BLOB_ATTR_TABLE) return false; 
+				break; 
+			case 'a': 
+				if(blob_attr_type(field) != BLOB_ATTR_ARRAY) return false; 
 				break; 
 			case 'v': 
 				break; 
@@ -197,4 +164,15 @@ bool _blob_attr_validate(struct blob_attr *attr, const char *signature, const ch
 
 bool blob_attr_validate(struct blob_attr *attr, const char *signature){
 	return _blob_attr_validate(attr, signature, NULL); 
+}
+
+bool blob_attr_parse(struct blob_attr *attr, const char *signature, struct blob_attr **out, int out_size){
+	memset(out, 0, sizeof(struct blob_attr*)); 
+	if(!blob_attr_validate(attr, signature)) return false; 
+	for(struct blob_attr *a = blob_attr_first_child(attr); a && out_size; a = blob_attr_next_child(attr, a)){
+		*out = a; 
+		out++; 
+		out_size--; 
+	}
+	return true; 
 }

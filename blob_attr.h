@@ -176,7 +176,6 @@ double blob_attr_get_double(const struct blob_attr *attr);
 extern void blob_attr_fill_pad(struct blob_attr *attr);
 extern void blob_attr_set_raw_len(struct blob_attr *attr, unsigned int len);
 extern bool blob_attr_equal(const struct blob_attr *a1, const struct blob_attr *a2);
-extern int blob_attr_parse(struct blob_attr *attr, struct blob_attr **data, const struct blob_attr_policy *info, int max);
 extern struct blob_attr *blob_attr_memdup(struct blob_attr *attr);
 extern bool blob_attr_check_type(const void *ptr, unsigned int len, int type);
 
@@ -198,3 +197,13 @@ static inline struct blob_attr *blob_attr_next_child(const struct blob_attr *sel
 void blob_attr_dump(struct blob_attr *self); 
 
 bool blob_attr_validate(struct blob_attr *attr, const char *signature); 
+
+bool blob_attr_parse(struct blob_attr *attr, const char *signature, struct blob_attr **out, int out_size); 
+
+#define blob_attr_for_each_kv(attr, key, value) \
+	for(key = blob_attr_first_child(attr), value = blob_attr_next_child(attr, key); \
+		key && value; \
+		key = blob_attr_next_child(attr, value), value = blob_attr_next_child(attr, key))
+
+#define blob_attr_for_each_child(attr, child) \
+	for(child = blob_attr_first_child(attr); child; child = blob_attr_next_child(attr, child))

@@ -8,7 +8,7 @@ The blobs are packed in platform independent format so you can use blobpack to
 pack data on one platform and then unpack it on a different one regardless of
 it's endianness. 
 
-Binary Format
+Data Types
 -------------
 
 Blobpack API shall be agnostic of actual packing implementation and shall
@@ -20,6 +20,28 @@ present the user with ability to pack following types:
 - array: an aggregation of any number of fields of any type
 - table: an aggregation of any number of fields where each element is a pair of string and any other type
 
+Validation
+----------
+
+Validation is done using a validation expression that represents the blob structure. 
+
+	Example:
+	siia[sv] would match a blob like this [string, int, int, array, array of string value pairs ]
+
+Valid elements are: 
+	
+	[ - open nested expression that describes an array
+	] - close nested array
+	{ - open nested expression that describes a table
+	} - close nested table
+	i - an integer
+	f - a floating point number
+	s - a string
+	t - an arbitrary table (don't care about content)
+	a - an arbitrary array (don't care about content) 
+
+Binary Format
+-------------
 The binary format shall automatically find the smallest possible wire type to
 pack the above as and the unpacking function shall read the correct type (which
 can be smaller) and unpack it into a long long int which is returned to the

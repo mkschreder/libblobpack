@@ -323,7 +323,24 @@ bool _blob_field_validate(struct blob_field *attr, const char *signature, const 
 				continue; 
 				break; 
 			case 'i': 
-				if(blob_field_type(field) != BLOB_FIELD_INT32 && blob_field_type(field) != BLOB_FIELD_INT8) return false; 
+				switch(blob_field_type(field)){
+					case BLOB_FIELD_INT8: 
+					case BLOB_FIELD_INT16: 
+					case BLOB_FIELD_INT32: 
+					case BLOB_FIELD_INT64: 
+						break; 
+					default: 
+						return false; 
+				}
+				break; 
+			case 'f': 
+				switch(blob_field_type(field)){
+					case BLOB_FIELD_FLOAT32: 
+					case BLOB_FIELD_FLOAT64: 
+						break; 
+					default: 
+						return false; 
+				}
 				break; 
 			case 's': 
 				if(blob_field_type(field) != BLOB_FIELD_STRING) return false; 

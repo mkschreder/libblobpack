@@ -341,10 +341,18 @@ char *blob_format_json_indent(struct blob_field *attr, bool list, int indent){
 	return blob_format_json_with_cb(attr, list, NULL, NULL, indent);
 }
 
-void blob_field_dump_json(struct blob_field *self){
+static void _blob_field_dump_json(struct blob_field *self, int indent){
 	assert(self); 
-	char *json = blob_format_json_indent(self, true, 1); 
+	char *json = blob_format_json_indent(self, true, indent); 
 	printf("%s\n", json); 
 	free(json); 
+}
+
+void blob_field_dump_json(struct blob_field *self){
+	_blob_field_dump_json(self, -1); 
+}
+
+void blob_field_dump_json_pretty(struct blob_field *self){
+	_blob_field_dump_json(self, 1); 
 }
 

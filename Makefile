@@ -1,4 +1,3 @@
-
 PACKAGE_NAME:=blobpack
 SOURCE:=$(wildcard *.c)
 HEADERS:=$(wildcard *.h)
@@ -10,7 +9,7 @@ INSTALL_PREFIX:=/usr
 STATIC_LIB:=lib$(PACKAGE_NAME).a
 SHARED_LIB:=lib$(PACKAGE_NAME).so
 
-PUBLIC_HEADERS:=blobpack.h blob.h blob_attr.h blobmsg_json.h utils.h
+PUBLIC_HEADERS:=blobpack.h blob.h blob_field.h blob_json.h utils.h
 HEADERS:=$(PUBLIC_HEADERS); 
 
 all: $(STATIC_LIB) $(SHARED_LIB) simple-example random-test

@@ -6,13 +6,13 @@ enum {
 	FIELD_MAX
 } ; 
 /*
-static struct blob_attr_policy policy[FIELD_MAX] = {
+static struct blob_field_policy policy[FIELD_MAX] = {
 	[FIELD_STRING] = { .name = "string", .type = BLOB_ATTR_STRING }, 
 	[FIELD_INT32] = { .name = "int32", .type = BLOB_ATTR_INT32 }
 }; 
 */
 int main(int argc, char **argv){
-	struct blob_buf buf; 
+	struct blob buf; 
 	char data[256]; 
 
 	srand(time(0)); 
@@ -22,19 +22,19 @@ int main(int argc, char **argv){
 	}
 
 	//buf.buf = data; 
-	//buf.head = (struct blob_attr*)data; 
+	//buf.head = (struct blob_field*)data; 
 
-	struct blob_buf b; 
-	blob_buf_init(&b, 0, 0); 
+	struct blob b; 
+	blob_init(&b, 0, 0); 
 
-	blob_buf_put_string(&b, "foo"); 
-	blob_buf_put_u32(&b, 123); 
+	blob_put_string(&b, "foo"); 
+	blob_put_int(&b, 123); 
 
-	printf("raw len: %u\n", (uint32_t)blob_buf_size(&b)); 
-	blob_buf_init(&buf, data, 256); 
-	struct blob_attr *out[FIELD_MAX]; 
+	printf("raw len: %u\n", (uint32_t)blob_size(&b)); 
+	blob_init(&buf, data, 256); 
+	struct blob_field *out[FIELD_MAX]; 
 /*
-	if(-1 == blob_buf_parse(&buf, policy, FIELD_MAX, out)){
+	if(-1 == blob_parse(&buf, policy, FIELD_MAX, out)){
 		printf("Error parsing blob!\n"); 
 	}
 */	
@@ -42,8 +42,8 @@ int main(int argc, char **argv){
 	if(!out[FIELD_INT32]) printf("OK! no int field!\n"); 
 
 	printf("Data: \n"); 
-	printf("string: %s\n", (char*)blob_attr_data(out[FIELD_STRING])); 
-	printf("int32: %d\n", blob_attr_get_u32(out[FIELD_INT32])); 
+	printf("string: %s\n", (char*)blob_field_data(out[FIELD_STRING])); 
+	printf("int32: %lli\n", blob_field_get_int(out[FIELD_INT32])); 
 
 	return 0; 
 }

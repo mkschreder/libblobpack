@@ -1,0 +1,34 @@
+/*
+ * Copyright (C) 2010-2012 Felix Fietkau <nbd@openwrt.org>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+#ifndef __BLOBMSG_JSON_H
+#define __BLOBMSG_JSON_H
+
+struct json_object;
+
+#include <stdbool.h>
+#include "blob.h"
+
+bool blob_put_json_object(struct blob *b, struct json_object *obj);
+bool blob_put_json_element(struct blob *b, struct json_object *obj);
+bool blob_put_json_from_string(struct blob *b, const char *str);
+bool blob_put_json_from_file(struct blob *b, const char *file);
+
+char *blob_format_json(struct blob_field *attr, bool list); 
+char *blob_format_json_indent(struct blob_field *attr, bool list, int indent); 
+
+void blob_field_dump_json(struct blob_field *self); 
+
+#endif

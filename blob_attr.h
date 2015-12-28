@@ -98,11 +98,25 @@ blob_attr_get_u8(const struct blob_attr *attr){
 	return *((uint8_t *) attr->data);
 }
 
+static inline uint8_t
+blob_attr_set_u8(const struct blob_attr *attr, uint8_t val){
+	if(!attr) return 0; 
+	*((uint8_t *) attr->data) = val;
+}
+
+
 static inline uint16_t
 blob_attr_get_u16(const struct blob_attr *attr){
 	if(!attr) return 0; 
 	uint16_t *tmp = (uint16_t*)attr->data;
 	return be16_to_cpu(*tmp);
+}
+
+static inline void
+blob_attr_set_u16(const struct blob_attr *attr, uint16_t val){
+	if(!attr) return; 
+	uint16_t *tmp = (uint16_t*)attr->data;
+	*tmp = cpu_to_be16(val); 
 }
 
 static inline uint32_t
@@ -134,10 +148,22 @@ blob_attr_get_i8(const struct blob_attr *attr){
 	return blob_attr_get_u8(attr);
 }
 
+static inline void
+blob_attr_set_i8(const struct blob_attr *attr, int8_t val){
+	if(!attr) return; 
+	blob_attr_set_u8(attr, val);
+}
+
 static inline int16_t
 blob_attr_get_i16(const struct blob_attr *attr){
 	if(!attr) return 0; 
 	return blob_attr_get_u16(attr);
+}
+
+static inline void
+blob_attr_set_i16(const struct blob_attr *attr, int16_t val){
+	if(!attr) return; 
+	blob_attr_set_u16(attr, val);
 }
 
 static inline int32_t
@@ -180,7 +206,7 @@ extern struct blob_attr *blob_attr_memdup(struct blob_attr *attr);
 extern bool blob_attr_check_type(const void *ptr, unsigned int len, int type);
 
 static inline struct blob_attr *blob_attr_first_child(const struct blob_attr *self){
-	assert(self); 
+	if(!self) return NULL; 
 	if(blob_attr_raw_len(self) <= sizeof(struct blob_attr)) return NULL; 
 	return (struct blob_attr*)blob_attr_data(self); 
 }

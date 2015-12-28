@@ -30,6 +30,9 @@
 #include "blob_attr.h"
 #include "utils.h"
 
+// arbitrary max size just to make sure we don't try to resize to a crazy value (should be something large yet reasonable!)
+#define BLOB_MAX_SIZE (10000000)
+
 /*
 Blob attributes can have any of the following types. 
 */ 

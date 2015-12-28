@@ -109,6 +109,7 @@ bool _blob_attr_validate(struct blob_attr *attr, const char *signature, const ch
 	const char *k = signature; 
 	//printf("validating %s\n", signature); 
 	struct blob_attr *field = blob_attr_first_child(attr); 
+	if(!field) return false; // correctly handle empty message!
 	while(*k && field){
 		//printf("KEY: %c\n", *k); 
 		switch(*k){
@@ -167,7 +168,7 @@ bool blob_attr_validate(struct blob_attr *attr, const char *signature){
 }
 
 bool blob_attr_parse(struct blob_attr *attr, const char *signature, struct blob_attr **out, int out_size){
-	memset(out, 0, sizeof(struct blob_attr*)); 
+	memset(out, 0, sizeof(struct blob_attr*) * out_size); 
 	if(!blob_attr_validate(attr, signature)) return false; 
 	for(struct blob_attr *a = blob_attr_first_child(attr); a && out_size; a = blob_attr_next_child(attr, a)){
 		*out = a; 

@@ -47,6 +47,8 @@ static void blob_attr_init(struct blob_attr *attr, int id, unsigned int len){
 
 //! Attepts to reallocate the buffer to fit the new payload data
 bool blob_buf_resize(struct blob_buf *buf, int minlen){
+	assert(minlen > 0 && minlen < BLOB_MAX_SIZE); 
+
 	char *new = 0;
 	int newsize = ((minlen / 256) + 1) * 256;
 	int cur_size = blob_buf_size(buf); 
@@ -224,6 +226,8 @@ struct blob_attr *blob_buf_put_double(struct blob_buf *buf, double value){
 } 
 
 struct blob_attr *blob_buf_put_attr(struct blob_buf *buf, struct blob_attr *attr){
+	if(!attr) return NULL; 
+
 	struct blob_attr *head = blob_buf_head(buf); 
 	int cur_len = blob_attr_pad_len(head); 
 	int attr_pad_len = blob_attr_pad_len(attr); 

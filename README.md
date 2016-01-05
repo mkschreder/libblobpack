@@ -20,6 +20,13 @@ present the user with ability to pack following types:
 - array: an aggregation of any number of fields of any type
 - table: an aggregation of any number of fields where each element is a pair of string and any other type
 
+Internally the types shall be packed to balance quick unpacking with space efficiency. 
+
+The format is intentionally made to include length even on fixed length types
+like integers to simplify and speed up packing and unpacking. Some
+optimizations can of course be done to the packing format, but at current time
+such optimizations are deemed to be unnecessary because the gains are marginal. 
+
 Validation
 ----------
 
@@ -61,20 +68,14 @@ For the sake of documenting current format, the format is outlined below:
 
 Unnamed fields: 
 
-            attr             attr
+            field             field
 	+-----------------+-----------------+
 	| hhhh | data..   | hhhh | data     |  
 	+-----------------+-----------------+
 
-Named field: 
-	
-	+-----------------------------+
-	| hhhh | ll | nnnn.. | data.. | 
-	+-----------------------------+
-
 The header consists of 4 bytes which have this layout: 
 
-	[ ettt tttt ssssssss ssssssss ssssssss ]
+	[ eeee tttt ssssssss ssssssss ssssssss ]
 
 	- e: reserved
 	- t: type of the field (see below)
@@ -115,7 +116,7 @@ Packing data
 	blob_init(&buf, 0, 0); // initialized to a single root element of zero length
 	blob_put_int(&buf, 1234); // will put an int16 because it is the smallest type into which the value would fit! 
 	blob_put_string(&buf, "a string"); 
-	blob_attr_dump_json(blob_head(&buf)); 
+	blob_field_dump_json(blob_head(&buf)); 
 	
 	// get the data
 	struct blob_field *field = blob_field_first_child(blob_head(&buf)); 
@@ -153,12 +154,6 @@ This is a class that allocates a binary buffer where you can then pack data. You
 		allocate memory. 
 		
 		Id parameter is for usage by higher level code for giving the buffer an id. Default is 0. 
-
-	blob_grow(struct blob_buf *buf, int len) - resize the buffer
-		
-		Resizes the allocated buffer to the specified size.  
-
-	TODO: finish the documentation
 
 LICENSE
 -------

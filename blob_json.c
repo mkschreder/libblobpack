@@ -26,7 +26,7 @@ bool blob_put_json_object(struct blob *b, json_object *obj)
 	json_object_object_foreach(obj, key, val) {
 		blob_put_string(b, key); 
 		if (!blob_put_json_element(b, val))
-			return false;
+			break; 
 	}
 	return true;
 }
@@ -87,11 +87,14 @@ static bool __blob_add_json(struct blob *b, json_object *obj)
 	if (!obj)
 		return false;
 
+	ret = blob_put_json_element(b, obj); 
+	/*
 	if (json_object_get_type(obj) == json_type_object){
 		ret = blob_put_json_object(b, obj);
 	} else {
 		ret = blob_put_json_array(b, json_object_get_array(obj)); 
 	}
+	*/
 	json_object_put(obj);
 	return ret;
 }

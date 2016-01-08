@@ -3,7 +3,7 @@ SOURCE:=$(wildcard *.c)
 HEADERS:=$(wildcard *.h)
 OBJECTS:=$(patsubst %.c,%.o,$(SOURCE))
 LDFLAGS+=
-CFLAGS+=-Werror -Wall -Wno-unused-function -std=gnu99 -fPIC
+CFLAGS+=-g -Werror -Wall -Wno-unused-function -std=gnu99 -fPIC
 INSTALL_PREFIX:=/usr
 
 STATIC_LIB:=lib$(PACKAGE_NAME).a
@@ -25,10 +25,10 @@ $(SHARED_LIB): $(OBJECTS)
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 simple-example: examples/simple.c libblobpack.a
-	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblobpack -ljson-c
+	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblobpack -ljson-c -lm
 
 random-test: tests/random.c libblobpack.a
-	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblobpack -ljson-c
+	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblobpack -ljson-c -lm
 
 install: 
 	mkdir -p $(INSTALL_PREFIX)/lib/ 

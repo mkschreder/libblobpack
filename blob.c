@@ -280,15 +280,13 @@ static void __attribute__((unused)) _blob_field_dump(struct blob_field *node, in
 		int id = blob_field_type(attr);
 		int len = blob_field_raw_pad_len(attr);
 
-		
-
 		int offset = (node)?((int)((char*)attr - (char*)node)):0; 
 		for(int c = 0; c < indent; c++) printf("\t"); 
 		printf("[ field ("); 
 		for(int c = 0; c < sizeof(struct blob_field); c++){
 			printf("%02x", (int)*((char*)attr + c) & 0xff); 
 		}
-		printf(") type=%s offset=%d padlen: %d, rawlen: %d ]\n", names[(id < BLOB_FIELD_LAST)?id:0], offset, len, blob_field_raw_len(attr)); 
+		printf(") type=%s offset=%d full padded len: %d, header+data: %d, data len: %d ]\n", names[(id < BLOB_FIELD_LAST)?id:0], offset, len, blob_field_raw_len(attr), blob_field_data_len(attr)); 
 
 		if(id == BLOB_FIELD_ARRAY || id == BLOB_FIELD_TABLE) {
 			_blob_field_dump(attr, indent+1); 

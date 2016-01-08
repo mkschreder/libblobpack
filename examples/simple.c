@@ -170,10 +170,24 @@ int main(int argc, char **argv)
 	}
 	
 	blob_reset(&buf); 
-	//blob_add_json_from_string(&buf, "{\"string\":\"Hello World\",\"array\":[1,2,3,4],\"object\":{\"foo\":\"bar\"}}"); 
-	blob_put_json_from_string(&buf, "[123,2,3,4]"); 
+	const char *json = "{\"test\":[123,2,3,4,\"string\",{\"foo\":\"bar\"}],\"foo\":\"bar\",\"obj\":{\"arr\":[]},\"part\":1.4}"; 
+	struct timespec start, end; 
+	clock_gettime(CLOCK_MONOTONIC, &start); 
+	blob_put_json(&buf, json); 
+	clock_gettime(CLOCK_MONOTONIC, &end); 
+	printf("encode json: %s\n", json); 
+	printf("time taken %lums\n", (end.tv_nsec - start.tv_nsec) / 1000); 
 	blob_dump(&buf); 
-
+	blob_field_dump_json(blob_head(&buf)); 
+	
+	// test the normal encoder/decoder
+	blob_reset(&buf); 
+	clock_gettime(CLOCK_MONOTONIC, &start); 
+	blob_put_json_from_string(&buf, json); 
+	clock_gettime(CLOCK_MONOTONIC, &end); 
+	printf("encode jsconc: %s\n", json); 
+	printf("time taken %lums\n", (end.tv_nsec - start.tv_nsec) / 1000); 
+	
 	fflush(stdout); 
 	blob_free(&buf); 
 	return 0;

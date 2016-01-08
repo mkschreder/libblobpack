@@ -32,4 +32,6 @@ char *blob_format_json_indent(struct blob_field *attr, bool list, int indent);
 void blob_field_dump_json(struct blob_field *self); 
 void blob_field_dump_json_pretty(struct blob_field *self); 
 
+bool blob_put_json(struct blob *self, const char *json); 
+
 #endif

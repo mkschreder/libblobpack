@@ -292,7 +292,6 @@ static void blob_format_json_list(struct strbuf *s, struct blob_field *attr, boo
 			blob_puts(s, ": ", s->indent ? 2 : 1);
 			pos = blob_field_next_child(attr, pos); 
 		}
-
 		blob_format_element(s, pos, array, false);
 		first = false;
 	}
@@ -352,10 +351,12 @@ static void _blob_field_dump_json(struct blob_field *self, int indent){
 }
 
 void blob_field_dump_json(struct blob_field *self){
+	assert(self); 
 	_blob_field_dump_json(self, -1); 
 }
 
 void blob_field_dump_json_pretty(struct blob_field *self){
+	assert(self); 
 	_blob_field_dump_json(self, 1); 
 }
 

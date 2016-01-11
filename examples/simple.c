@@ -43,7 +43,7 @@ static void dump_attr_data(struct blob_field *data, int indent, int next_indent)
 		break;
 	case BLOB_FIELD_FLOAT32: 
 	case BLOB_FIELD_FLOAT64: 
-		indent_printf(indent, "%Le\n", (long double) blob_field_get_float(data)); 
+		indent_printf(indent, "%Le\n", (long double) blob_field_get_real(data)); 
 		break; 
 	case BLOB_FIELD_TABLE:
 	case BLOB_FIELD_ARRAY:
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
 		
 		blob_dump(&buf); 
 		dump_message(&buf);
-		char *json = blob_format_json(blob_head(&buf), false); 
+		char *json = blob_to_json(&buf); 
 	 	printf("json: %s\n", json);
 		free(json); 
 		const char *sig = "{sv}s[{si}]"; 
@@ -183,7 +183,7 @@ int main(int argc, char **argv)
 	// test the normal encoder/decoder
 	blob_reset(&buf); 
 	clock_gettime(CLOCK_MONOTONIC, &start); 
-	blob_put_json_from_string(&buf, json); 
+	blob_put_json(&buf, json); 
 	clock_gettime(CLOCK_MONOTONIC, &end); 
 	printf("encode jsconc: %s\n", json); 
 	printf("time taken %lums\n", (end.tv_nsec - start.tv_nsec) / 1000); 

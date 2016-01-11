@@ -205,7 +205,7 @@ long long blob_field_get_int(const struct blob_field *self){
 	return 0; 
 }
 
-double blob_field_get_float(const struct blob_field *self){
+double blob_field_get_real(const struct blob_field *self){
 	int type = blob_field_type(self); 
 	switch(type){
 		case BLOB_FIELD_INT8: return blob_field_get_i8(self); 

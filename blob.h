@@ -106,11 +106,22 @@ struct blob_field *blob_put_u64(struct blob *buf, uint64_t val);
 #define blob_put_i64	blob_put_u64
 */
 
+//! write a boolean into the buffer
 struct blob_field *blob_put_bool(struct blob *buf, bool val); 
-struct blob_field *blob_put_int(struct blob *buf, long long val); 
-struct blob_field *blob_put_float(struct blob *buf, double value); 
+
+//! write a string into the buffer
 struct blob_field *blob_put_string(struct blob *buf, const char *str); 
 
+//! write binary data into the buffer
+struct blob_field *blob_put_binary(struct blob *buf, const void *data, unsigned int size); 
+
+//! write a number into the buffer
+struct blob_field *blob_put_int(struct blob *buf, long long val); 
+
+//! write a real into the buffer
+struct blob_field *blob_put_real(struct blob *buf, double value); 
+
+//! write a raw attribute into the buffer
 struct blob_field *blob_put_attr(struct blob *buf, struct blob_field *attr); 
 
 //! print out the whole buffer 

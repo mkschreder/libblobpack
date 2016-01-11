@@ -490,8 +490,7 @@ int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char 
 #define Buffer_AppendCharUnchecked(__enc, __chr) \
                 *((__enc)->offset++) = __chr; \
 
-FASTCALL_ATTR INLINE_PREFIX void FASTCALL_MSVC strreverse(char* begin, char* end)
-{
+static void strreverse(char* begin, char* end){
   char aux;
   while (end > begin)
   aux = *end, *end-- = *begin, *begin++ = aux;

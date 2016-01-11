@@ -20,7 +20,7 @@
 #include <json-c/json.h>
 
 typedef const char *(*blob_json_format_t)(void *priv, struct blob_field *attr);
-
+/*
 bool blob_put_json_object(struct blob *b, json_object *obj)
 {
 	json_object_object_foreach(obj, key, val) {
@@ -88,13 +88,6 @@ static bool __blob_add_json(struct blob *b, json_object *obj)
 		return false;
 
 	ret = blob_put_json_element(b, obj); 
-	/*
-	if (json_object_get_type(obj) == json_type_object){
-		ret = blob_put_json_object(b, obj);
-	} else {
-		ret = blob_put_json_array(b, json_object_get_array(obj)); 
-	}
-	*/
 	json_object_put(obj);
 	return ret;
 }
@@ -106,7 +99,7 @@ bool blob_put_json_from_file(struct blob *b, const char *file){
 bool blob_put_json_from_string(struct blob *b, const char *str){
 	return __blob_add_json(b, json_tokener_parse(str));
 }
-
+*/
 struct strbuf {
 	int len;
 	int pos;
@@ -335,24 +328,28 @@ char *blob_format_json_with_cb(struct blob_field *attr, bool list, blob_json_for
 	return s.buf;
 }
 
-char *blob_format_json(struct blob_field *attr, bool list){
-	return blob_format_json_with_cb(attr, list, NULL, NULL, -1);
+char *blob_field_to_json(struct blob_field *attr){
+	return blob_format_json_with_cb(attr, false, NULL, NULL, -1);
 }
 
-char *blob_format_json_indent(struct blob_field *attr, bool list, int indent){
-	return blob_format_json_with_cb(attr, list, NULL, NULL, indent);
+char *blob_field_to_json_pretty(struct blob_field *attr){
+	return blob_format_json_with_cb(attr, false, NULL, NULL, 1);
 }
 
 static void _blob_field_dump_json(struct blob_field *self, int indent){
 	assert(self); 
-	char *json = blob_format_json_indent(self, true, indent); 
+	char *json = NULL; 
+	if(indent == 1)
+		json = blob_field_to_json(self); 
+	else 
+		json = blob_field_to_json_pretty(self); 
 	printf("%s\n", json); 
 	free(json); 
 }
 
 void blob_field_dump_json(struct blob_field *self){
 	assert(self); 
-	_blob_field_dump_json(self, -1); 
+	_blob_field_dump_json(self, 0); 
 }
 
 void blob_field_dump_json_pretty(struct blob_field *self){

@@ -40,7 +40,7 @@ uint32_t blob_field_raw_pad_len(const struct blob_field *attr);
 
 bool blob_field_get_bool(const struct blob_field *self); 
 long long int blob_field_get_int(const struct blob_field *self); 
-double blob_field_get_float(const struct blob_field *self); 
+double blob_field_get_real(const struct blob_field *self); 
 const char *blob_field_get_string(const struct blob_field *self); 
 
 /*

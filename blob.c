@@ -311,7 +311,7 @@ void blob_dump(struct blob *self){
 	if(!self) return; 
 
 	printf("=========== blob ===========\n"); 
-	printf("size: %lu, memory: %lu\n", blob_size(self), self->memlen);
+	printf("size: %d, memory: %d\n", (int)blob_size(self), (int)self->memlen);
 	for(int c = 0; c < 8; c++) printf("%02x ", ((char*)self->buf)[c] & 0xff); 
 	printf("\n"); 
 	_blob_field_dump(blob_head(self), 0); 

@@ -36,7 +36,7 @@ http://www.opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
  * Copyright (c) 1994 Sun Microsystems, Inc.
 */
 
-#include <blobpack/blobpack.h>
+#include "blobpack.h"
 #include <stdlib.h>
 #include <string.h>
 #include "ujson.h"
@@ -103,7 +103,7 @@ JSOBJ Object_newUnsignedLong(void *prv, JSUINT64 value){
 
 JSOBJ Object_newDouble(void *prv, double value){
 	DEBUG("new double\n"); 
-	return blob_put_float(prv, value); 
+	return blob_put_real(prv, value); 
 }
 
 static void Object_releaseObject(void *prv, JSOBJ obj){

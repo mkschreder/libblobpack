@@ -32,7 +32,7 @@ int main(int argc, char **argv){
 
 	printf("raw len: %u\n", (uint32_t)blob_size(&b)); 
 	blob_init(&buf, data, 256); 
-	struct blob_field *out[FIELD_MAX]; 
+	struct blob_field *out[FIELD_MAX] = {0}; 
 /*
 	if(-1 == blob_parse(&buf, policy, FIELD_MAX, out)){
 		printf("Error parsing blob!\n"); 

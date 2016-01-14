@@ -240,6 +240,10 @@ struct blob_field *blob_put_double(struct blob *buf, double value){
 	return blob_put(buf, BLOB_FIELD_FLOAT64, &val, sizeof(val));
 } 
 
+struct blob_field *blob_put_real(struct blob *buf, double value){
+	return blob_put_double(buf, value); 
+}
+
 struct blob_field *blob_put_attr(struct blob *buf, struct blob_field *attr){
 	if(!attr) return NULL; 
 

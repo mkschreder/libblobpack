@@ -339,7 +339,7 @@ char *blob_field_to_json_pretty(struct blob_field *attr){
 static void _blob_field_dump_json(struct blob_field *self, int indent){
 	assert(self); 
 	char *json = NULL; 
-	if(indent == 1)
+	if(indent == 0)
 		json = blob_field_to_json(self); 
 	else 
 		json = blob_field_to_json_pretty(self); 

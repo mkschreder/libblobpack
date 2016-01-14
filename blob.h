@@ -72,7 +72,7 @@ static inline struct blob_field *blob_head(struct blob *self){
 }
 
 //! returns size of the whole buffer (including header element and padding)
-static inline size_t blob_size(struct blob *self){ return blob_field_raw_pad_len(blob_head(self)); }
+static inline uint32_t blob_size(struct blob *self){ return blob_field_raw_pad_len(blob_head(self)); }
 
 typedef void* blob_offset_t; 
 

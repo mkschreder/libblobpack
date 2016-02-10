@@ -17,7 +17,7 @@
 #include "blob.h"
 #include "blob_json.h"
 
-#include <json-c/json.h>
+//#include <json-c/json.h>
 
 typedef const char *(*blob_json_format_t)(void *priv, struct blob_field *attr);
 /*

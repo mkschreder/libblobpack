@@ -25,10 +25,10 @@ $(SHARED_LIB): $(OBJECTS)
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 simple-example: examples/simple.c libblobpack.a
-	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblobpack -ljson-c -lm
+	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblobpack -lm
 
 random-test: tests/random.c libblobpack.a
-	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblobpack -ljson-c -lm
+	$(CC) $(CFLAGS) -I. -o $@ $^ -L. -lblobpack -lm
 
 install: 
 	mkdir -p $(prefix)/lib/ 

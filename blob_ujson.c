@@ -25,6 +25,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+Added blob parsing code: 
+Copyright (C) 2016 Martin K. Schröder <mkschreder.uk@gmail.com>
 
 Portions of code from MODP_ASCII - Ascii transformations (upper/lower, etc)
 http://code.google.com/p/stringencoders/
@@ -39,6 +41,9 @@ http://www.opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
 #include "blobpack.h"
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include "ujson.h"
 
 #define DEBUG(...) {}
@@ -159,5 +164,25 @@ bool blob_put_json(struct blob *self, const char *json){
 	}
 
 	return true;
+}
+
+bool blob_put_json_from_file(struct blob *self, const char *file){
+	// this is a rather simplistic approach where we just load the whole file into memory and then parse the buffer. 
+	// there can probably be better ways where we parse data in place.. 
+	// TODO: solve if this becomes a problem later
+	size_t file_size = 0; 
+	int fd = open(file, O_RDONLY); 
+	if(fd < 0) return false; 
+	file_size = lseek(fd, SEEK_END, 0); 
+	if(file_size > 1000000UL) { close(fd); return false; }
+	lseek(fd, SEEK_SET, 0); 	
+	char *buffer = alloca(file_size + 1); // allocate on stack
+	memset(buffer, 0, file_size + 1); 
+	if(file_size != read(fd, buffer, file_size)){
+		close(fd); 
+		return false; 
+	}
+	close(fd); 
+	return blob_put_json(self, buffer); 
 }
 

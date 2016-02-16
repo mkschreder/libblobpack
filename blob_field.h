@@ -79,6 +79,9 @@ bool blob_field_validate(struct blob_field *attr, const char *signature);
 
 bool blob_field_parse(struct blob_field *attr, const char *signature, struct blob_field **out, int out_size); 
 
+struct blob_policy; 
+bool blob_field_parse_values(struct blob_field *attr, struct blob_policy *policy, int policy_size); 
+
 #define blob_field_for_each_kv(attr, key, value) \
 	for(key = blob_field_first_child(attr), value = blob_field_next_child(attr, key); \
 		key && value; \

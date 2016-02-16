@@ -38,5 +38,6 @@ char *blob_field_to_json(struct blob_field *self);
 static inline char *blob_to_json(struct blob *self){ return blob_field_to_json(blob_head(self)); }
 
 bool blob_put_json(struct blob *self, const char *json); 
+bool blob_put_json_from_file(struct blob *self, const char *file); 
 
 #endif

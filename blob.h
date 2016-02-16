@@ -49,6 +49,7 @@ enum {
 	BLOB_FIELD_FLOAT64, // a packed 64 bit float
 	BLOB_FIELD_ARRAY, // only unnamed elements
 	BLOB_FIELD_TABLE, // only named elements
+	BLOB_FIELD_ANY, // to be used only as a wildcard
 	BLOB_FIELD_LAST
 };
 
@@ -56,6 +57,12 @@ struct blob {
 	size_t memlen; // total length of the allocated memory area 
 	void *buf; // raw buffer data
 };
+
+struct blob_policy {
+	const char *name; 
+	int type; 
+	struct blob_field *value; 
+}; 
 
 //! Initializes a blob structure. Optionally takes memory area to be copied into the buffer which must represent a valid blob buf. 
 void blob_init(struct blob *buf, const char *data, size_t size);

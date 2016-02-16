@@ -227,7 +227,7 @@ static void blob_format_element(struct strbuf *s, struct blob_field *attr, bool 
 
 	switch(blob_field_type(attr)) {
 	case BLOB_FIELD_INVALID:
-		sprintf(buf, "(invalid)");
+		sprintf(buf, "null");
 		break;
 	//case BLOB_FIELD_BOOL:
 	//	sprintf(buf, "%s", *(uint8_t *)data ? "true" : "false");

@@ -377,3 +377,30 @@ bool blob_field_parse(struct blob_field *attr, const char *signature, struct blo
 	}
 	return true; 
 }
+
+bool blob_field_parse_values(struct blob_field *attr, struct blob_policy *policy, int policy_size){
+	bool valid = true; 
+	if(blob_field_type(attr) == BLOB_FIELD_TABLE){
+		struct blob_field *key, *value; 
+		blob_field_for_each_kv(attr, key, value){
+			for(int c = 0; c < policy_size; c++){
+				if(strcmp(blob_field_get_string(key), policy[c].name) == 0){
+					if(policy[c].type == BLOB_FIELD_ANY || blob_field_type(value) == policy[c].type) {
+						policy[c].value = value; 
+					} else { policy[c].value = NULL; valid = false; }
+					break; 
+				}
+			}
+		}
+	} else if(blob_field_type(attr) == BLOB_FIELD_ARRAY){
+		struct blob_field *child; 
+		int pidx = 0; 
+		blob_field_for_each_child(attr, child){
+			if(policy[pidx].type == BLOB_FIELD_ANY || blob_field_type(child) == policy[pidx].type) {
+				policy[pidx].value = child; 
+			} else { policy[pidx].value = NULL; valid = false; }
+			pidx++; 
+		}
+	}
+	return valid; 
+}

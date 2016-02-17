@@ -17,7 +17,7 @@ static const int blob_type_minlen[BLOB_FIELD_LAST] = {
 }*/
 
 void blob_field_fill_pad(struct blob_field *attr) {
-	assert(attr); 
+	if(!attr) return; 
 	char *buf = (char *) attr;
 	int len = blob_field_raw_pad_len(attr);
 	int delta = len - blob_field_raw_len(attr);
@@ -27,7 +27,7 @@ void blob_field_fill_pad(struct blob_field *attr) {
 }
 
 void blob_field_set_raw_len(struct blob_field *attr, unsigned int len){
-	assert(attr); 
+	if(!attr) return; 
 	if(len < sizeof(struct blob_field)) len = sizeof(struct blob_field); 	
 	len &= BLOB_FIELD_LEN_MASK;
 	attr->id_len &= ~cpu_to_be32(BLOB_FIELD_LEN_MASK);
@@ -56,8 +56,10 @@ bool blob_field_check_type(const void *ptr, unsigned int len, int type){
 }
 
 bool
-blob_field_equal(const struct blob_field *a1, const struct blob_field *a2)
-{
+blob_field_equal(const struct blob_field *a1, const struct blob_field *a2){
+	if((!a1 || !a2) && (a1 != a2)) return false; 
+	if((!a1 || !a2) && (a1 == a2)) return true; 
+
 	if (!a1 && !a2)
 		return true;
 
@@ -78,6 +80,7 @@ void *blob_field_data(const struct blob_field *attr){
 
 
 struct blob_field *blob_field_copy(struct blob_field *attr){
+	if(!attr) return NULL; 
 	struct blob_field *ret;
 	int size = blob_field_raw_pad_len(attr);
 
@@ -91,7 +94,7 @@ struct blob_field *blob_field_copy(struct blob_field *attr){
 
 uint8_t 
 blob_field_get_u8(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	return *((uint8_t *) attr->data);
 }
 
@@ -102,7 +105,7 @@ void blob_field_set_u8(const struct blob_field *attr, uint8_t val){
 
 uint16_t
 blob_field_get_u16(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr);
 	uint16_t *tmp = (uint16_t*)attr->data;
 	return be16_to_cpu(*tmp);
 }
@@ -116,7 +119,7 @@ blob_field_set_u16(const struct blob_field *attr, uint16_t val){
 
 uint32_t
 blob_field_get_u32(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	uint32_t *tmp = (uint32_t*)attr->data;
 	return be32_to_cpu(*tmp);
 }
@@ -130,7 +133,7 @@ blob_field_set_u32(const struct blob_field *attr, uint32_t val){
 
 uint64_t
 blob_field_get_u64(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	uint32_t *ptr = (uint32_t *) blob_field_data(attr);
 	uint64_t tmp = ((uint64_t) be32_to_cpu(ptr[0])) << 32;
 	tmp |= be32_to_cpu(ptr[1]);
@@ -139,7 +142,7 @@ blob_field_get_u64(const struct blob_field *attr){
 
 int8_t
 blob_field_get_i8(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	return blob_field_get_u8(attr);
 }
 
@@ -151,7 +154,7 @@ blob_field_set_i8(const struct blob_field *attr, int8_t val){
 
 int16_t
 blob_field_get_i16(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	return blob_field_get_u16(attr);
 }
 
@@ -163,35 +166,35 @@ blob_field_set_i16(const struct blob_field *attr, int16_t val){
 
 int32_t
 blob_field_get_i32(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	return blob_field_get_u32(attr);
 }
 
 void
 blob_field_set_i32(const struct blob_field *attr, int32_t val){
-	if(!attr) return; 
+	if(!attr) return;
 	blob_field_set_u32(attr, val);
 }
 
 int64_t
 blob_field_get_i64(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	return blob_field_get_u64(attr);
 }
 
 float blob_field_get_f32(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	return unpack754_32(blob_field_get_u32(attr)); 
 }
 
 double blob_field_get_f64(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	return unpack754_64(blob_field_get_u64(attr)); 
 }
 
 
 long long blob_field_get_int(const struct blob_field *self){
-	assert(self); 
+	assert(self);  
 	int type = blob_field_type(self); 
 	switch(type){
 		case BLOB_FIELD_INT8: return blob_field_get_i8(self); 
@@ -251,6 +254,7 @@ unsigned int blob_field_type(const struct blob_field *attr){
 }
 
 void blob_field_set_type(struct blob_field *self, int type){
+	assert(self); 
 	int id_len = be32_to_cpu(self->id_len); 
 	id_len = (id_len & ~BLOB_FIELD_ID_MASK) | (type << BLOB_FIELD_ID_SHIFT); 	
 	self->id_len = cpu_to_be32(id_len);
@@ -280,7 +284,7 @@ blob_field_raw_pad_len(const struct blob_field *attr){
 }
 
 struct blob_field *blob_field_first_child(const struct blob_field *self){
-	assert(self); 
+	if(!self) return NULL; 
 	if(blob_field_raw_len(self) <= sizeof(struct blob_field)) return NULL; 
 	return (struct blob_field*)blob_field_data(self); 
 }
@@ -369,12 +373,12 @@ bool _blob_field_validate(struct blob_field *attr, const char *signature, const 
 }
 
 bool blob_field_validate(struct blob_field *attr, const char *signature){
-	assert(attr); 
+	if(!attr) return false; 
 	return _blob_field_validate(attr, signature, NULL); 
 }
 
 bool blob_field_parse(struct blob_field *attr, const char *signature, struct blob_field **out, int out_size){
-	assert(attr); 
+	if(!attr) return false;  
 	memset(out, 0, sizeof(struct blob_field*) * out_size); 
 	if(!blob_field_validate(attr, signature)) return false; 
 	for(struct blob_field *a = blob_field_first_child(attr); a && out_size; a = blob_field_next_child(attr, a)){
@@ -386,7 +390,7 @@ bool blob_field_parse(struct blob_field *attr, const char *signature, struct blo
 }
 
 bool blob_field_parse_values(struct blob_field *attr, struct blob_policy *policy, int policy_size){
-	assert(attr); 
+	if(!attr) return false; 
 	bool valid = true; 
 	if(blob_field_type(attr) == BLOB_FIELD_TABLE){
 		struct blob_field *key, *value; 

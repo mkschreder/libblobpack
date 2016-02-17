@@ -17,6 +17,7 @@ static const int blob_type_minlen[BLOB_FIELD_LAST] = {
 }*/
 
 void blob_field_fill_pad(struct blob_field *attr) {
+	assert(attr); 
 	char *buf = (char *) attr;
 	int len = blob_field_raw_pad_len(attr);
 	int delta = len - blob_field_raw_len(attr);
@@ -26,6 +27,7 @@ void blob_field_fill_pad(struct blob_field *attr) {
 }
 
 void blob_field_set_raw_len(struct blob_field *attr, unsigned int len){
+	assert(attr); 
 	if(len < sizeof(struct blob_field)) len = sizeof(struct blob_field); 	
 	len &= BLOB_FIELD_LEN_MASK;
 	attr->id_len &= ~cpu_to_be32(BLOB_FIELD_LEN_MASK);
@@ -189,6 +191,7 @@ double blob_field_get_f64(const struct blob_field *attr){
 
 
 long long blob_field_get_int(const struct blob_field *self){
+	assert(self); 
 	int type = blob_field_type(self); 
 	switch(type){
 		case BLOB_FIELD_INT8: return blob_field_get_i8(self); 
@@ -206,6 +209,7 @@ long long blob_field_get_int(const struct blob_field *self){
 }
 
 double blob_field_get_real(const struct blob_field *self){
+	assert(self); 
 	int type = blob_field_type(self); 
 	switch(type){
 		case BLOB_FIELD_INT8: return blob_field_get_i8(self); 
@@ -223,18 +227,19 @@ double blob_field_get_real(const struct blob_field *self){
 }
 
 bool blob_field_get_bool(const struct blob_field *self){
+	assert(self); 
 	return !!blob_field_get_int(self); 
 }
 
 const char *
 blob_field_get_string(const struct blob_field *attr){
-	if(!attr) return "(nil)"; 
+	if(!attr) return NULL; 
 	return attr->data;
 }
 
 void 
 blob_field_get_raw(const struct blob_field *attr, uint8_t *data, size_t data_size){
-	if(!attr) return; 
+	assert(attr); 
 	memcpy(data, attr->data, data_size); 
 }
 
@@ -254,28 +259,28 @@ void blob_field_set_type(struct blob_field *self, int type){
 //! returns full length of attribute
 unsigned int
 blob_field_raw_len(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	return (be32_to_cpu(attr->id_len) & BLOB_FIELD_LEN_MASK); 
 }
 
 //! includes length of data of the attribute
 unsigned int
 blob_field_data_len(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	return blob_field_raw_len(attr) - sizeof(struct blob_field);
 }
 
 //! returns padded length of full attribute
 uint32_t 
 blob_field_raw_pad_len(const struct blob_field *attr){
-	if(!attr) return 0; 
+	assert(attr); 
 	uint32_t len = blob_field_raw_len(attr);
 	len = (len + BLOB_FIELD_ALIGN - 1) & ~(BLOB_FIELD_ALIGN - 1);
 	return len;
 }
 
 struct blob_field *blob_field_first_child(const struct blob_field *self){
-	if(!self) return NULL; 
+	assert(self); 
 	if(blob_field_raw_len(self) <= sizeof(struct blob_field)) return NULL; 
 	return (struct blob_field*)blob_field_data(self); 
 }
@@ -364,10 +369,12 @@ bool _blob_field_validate(struct blob_field *attr, const char *signature, const 
 }
 
 bool blob_field_validate(struct blob_field *attr, const char *signature){
+	assert(attr); 
 	return _blob_field_validate(attr, signature, NULL); 
 }
 
 bool blob_field_parse(struct blob_field *attr, const char *signature, struct blob_field **out, int out_size){
+	assert(attr); 
 	memset(out, 0, sizeof(struct blob_field*) * out_size); 
 	if(!blob_field_validate(attr, signature)) return false; 
 	for(struct blob_field *a = blob_field_first_child(attr); a && out_size; a = blob_field_next_child(attr, a)){
@@ -379,15 +386,19 @@ bool blob_field_parse(struct blob_field *attr, const char *signature, struct blo
 }
 
 bool blob_field_parse_values(struct blob_field *attr, struct blob_policy *policy, int policy_size){
+	assert(attr); 
 	bool valid = true; 
 	if(blob_field_type(attr) == BLOB_FIELD_TABLE){
 		struct blob_field *key, *value; 
+		int processed = 0; 
 		blob_field_for_each_kv(attr, key, value){
+			if(processed == policy_size) return false; 
 			for(int c = 0; c < policy_size; c++){
 				if(strcmp(blob_field_get_string(key), policy[c].name) == 0){
 					if(policy[c].type == BLOB_FIELD_ANY || blob_field_type(value) == policy[c].type) {
 						policy[c].value = value; 
 					} else { policy[c].value = NULL; valid = false; }
+					processed++; 
 					break; 
 				}
 			}
@@ -396,10 +407,12 @@ bool blob_field_parse_values(struct blob_field *attr, struct blob_policy *policy
 		struct blob_field *child; 
 		int pidx = 0; 
 		blob_field_for_each_child(attr, child){
+			if(!policy_size) return false; 
 			if(policy[pidx].type == BLOB_FIELD_ANY || blob_field_type(child) == policy[pidx].type) {
 				policy[pidx].value = child; 
 			} else { policy[pidx].value = NULL; valid = false; }
 			pidx++; 
+			policy_size--; 
 		}
 	}
 	return valid; 

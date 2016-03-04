@@ -213,6 +213,7 @@ blob_offset_t blob_open_array(struct blob *buf){
 }
 
 void blob_close_array(struct blob *buf, blob_offset_t offset){
+	if((unsigned long)offset > blob_size(buf)) return; 
 	struct blob_field *attr = blob_offset_to_attr(buf, offset);
 	int len = (buf->buf + blob_field_raw_len(blob_head(buf))) - (void*)attr; 
 	blob_field_set_raw_len(attr, len);
@@ -224,6 +225,7 @@ blob_offset_t blob_open_table(struct blob *buf){
 }
 
 void blob_close_table(struct blob *buf, blob_offset_t offset){
+	if((unsigned long)offset > blob_size(buf)) return; 
 	struct blob_field *attr = blob_offset_to_attr(buf, offset);
 	int len = (buf->buf + blob_field_raw_len(blob_head(buf))) - (void*)attr; 
 	blob_field_set_raw_len(attr, len);

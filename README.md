@@ -1,6 +1,8 @@
 Binary Blob Library
 -------------------
 
+[![Coverage Status](https://coveralls.io/repos/github/mkschreder/libblobpack/badge.svg?branch=master)](https://coveralls.io/github/mkschreder/libblobpack?branch=master)
+
 Blobpack is a library for packing arbitrary structured data into binary blobs.
 Originally based on OpenWRT blob packing code and slightly inspired by msgpack. 
 

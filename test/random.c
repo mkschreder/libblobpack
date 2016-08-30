@@ -41,9 +41,11 @@ int main(int argc, char **argv){
 	if(!out[FIELD_STRING]) printf("OK! no string field!\n"); 
 	if(!out[FIELD_INT32]) printf("OK! no int field!\n"); 
 
+/*
 	printf("Data: \n"); 
 	printf("string: %s\n", (char*)blob_field_data(out[FIELD_STRING])); 
 	printf("int32: %lli\n", blob_field_get_int(out[FIELD_INT32])); 
+*/
 
 	return 0; 
 }

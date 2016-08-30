@@ -9,5 +9,5 @@ LT_INIT
 
 AC_PROG_CC
 
-AC_OUTPUT(Makefile src/Makefile)
+AC_OUTPUT(Makefile src/Makefile test/Makefile)
 

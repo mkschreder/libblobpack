@@ -1,6 +1,6 @@
 @CODE_COVERAGE_RULES@
 check_PROGRAMS=random
 random_SOURCES=random.c
-random_CFLAGS=-I../src/ -std=c99 
-random_LDFLAGS=-L../src/.libs/ -lblobpack -lm
+random_CFLAGS=$(CODE_COVERAGE_CFLAGS) -I../src/ -std=c99 
+random_LDFLAGS=$(CODE_COVERAGE_LDFLAGS) -L../src/.libs/ -lblobpack -lm
 TESTS=$(check_PROGRAMS)

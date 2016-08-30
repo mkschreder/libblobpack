@@ -1,4 +1,5 @@
 language: c
+sudo: required
 install:
   - pip install --user cpp-coveralls
 script: autoreconf -if && ./configure --enable-code-coverage && make && make check

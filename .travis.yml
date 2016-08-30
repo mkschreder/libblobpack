@@ -1,6 +1,2 @@
 language: c
-script:
-	- autoreconf
-	- ./configure
-	- make 
-	- make check
+script: autoreconf -i && ./configure && make && make check

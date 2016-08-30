@@ -22,6 +22,8 @@ int main(){
 	blob_put_int(&blob, 100); 
 	blob_put_int(&blob, 200); 
 	blob_put_int(&blob, 1000); 
+	blob_put_int(&blob, 70000); 
+	blob_put_int(&blob, 5000000000lu); 
 	blob_put_string(&blob, "3.14"); 
 	blob_put_int(&blob, 5000000000lu); 
 	blob_put_real(&blob, M_PI); 
@@ -63,6 +65,8 @@ int main(){
 	TEST(blob_field_get_real(child = blob_field_next_child(root, child)) == 100); 
 	TEST(blob_field_get_real(child = blob_field_next_child(root, child)) == 200); 
 	TEST(blob_field_get_real(child = blob_field_next_child(root, child)) == 1000); 
+	TEST(blob_field_get_real(child = blob_field_next_child(root, child)) == 70000); 
+	TEST(blob_field_get_real(child = blob_field_next_child(root, child)) == 5000000000lu); 
 	TEST(is_equal(blob_field_get_real(child = blob_field_next_child(root, child)), 3.14f)); 
 	TEST(blob_field_get_int(child = blob_field_next_child(root, child)) == 5000000000lu); 
 	TEST(is_equal(blob_field_get_real(child = blob_field_next_child(root, child)), M_PI)); 

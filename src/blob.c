@@ -231,7 +231,6 @@ void blob_close_table(struct blob *buf, blob_offset_t offset){
 	blob_field_set_raw_len(attr, len);
 }
 
-
 struct blob_field *blob_put_float(struct blob *buf, double value){
 	uint32_t val = cpu_to_be32(pack754_32((float)value));  
 	return blob_put(buf, BLOB_FIELD_FLOAT32, &val, sizeof(val)); 
@@ -243,6 +242,7 @@ struct blob_field *blob_put_double(struct blob *buf, double value){
 } 
 
 struct blob_field *blob_put_real(struct blob *buf, double value){
+	if((float)value == value) return blob_put_float(buf, value); 
 	return blob_put_double(buf, value); 
 }
 

@@ -26,14 +26,19 @@ int main(){
 	blob_close_table(&blob, o); 
 
 	o = blob_open_array(&blob); 
-	blob_put_int(&blob, 1); 
-	blob_put_int(&blob, 2); 
-	blob_put_int(&blob, 3); 
+	blob_put_int(&blob, 100); 
+	blob_put_int(&blob, 200); 
+	blob_put_int(&blob, 1000); 
+	blob_put_int(&blob, 70000); 
+	blob_put_int(&blob, 5000000000lu); 
 	blob_close_array(&blob, o); 
+
+	struct blob_field *out[8]; 
+	TEST(blob_field_parse(blob_head(&blob), "isifssta", out, 8)); 
 
 	char *json = blob_to_json(&blob); 
 	
-	TEST(strcmp("[1,\"foo\",243,3.141593e+00,\"copyme\",\"copyme\",{\"one\":1,\"two\":2,\"three\":3},[1,2,3]]", json) == 0); 
+	TEST(strcmp("[1,\"foo\",243,3.141593e+00,\"copyme\",\"copyme\",{\"one\":1,\"two\":2,\"three\":3},[100,200,1000,70000,5000000000]]", json) == 0); 
 
 	struct blob b2; 
 	blob_init_from_json(&b2, json); 

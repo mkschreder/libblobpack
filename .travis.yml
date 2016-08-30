@@ -4,3 +4,7 @@ install:
 script: autoreconf -if && ./configure --enable-code-coverage && make && make check
 after_success:
   - coveralls
+env:
+  apt:
+    packages:
+	  - lcov

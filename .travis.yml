@@ -1,6 +1,6 @@
 language: c
 script:
-	autoreconf
-	./configure
-	make 
-	make check
+	- autoreconf
+	- ./configure
+	- make 
+	- make check

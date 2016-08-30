@@ -28,7 +28,7 @@ void blob_field_fill_pad(struct blob_field *attr) {
 
 void blob_field_set_raw_len(struct blob_field *attr, unsigned int len){
 	if(!attr) return; 
-	if(len < sizeof(struct blob_field)) len = sizeof(struct blob_field); 	
+	if(len < sizeof(struct blob_field)) len = sizeof(struct blob_field);
 	len &= BLOB_FIELD_LEN_MASK;
 	attr->id_len &= ~cpu_to_be32(BLOB_FIELD_LEN_MASK);
 	attr->id_len |= cpu_to_be32(len);

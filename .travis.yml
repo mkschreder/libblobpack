@@ -1,6 +1,6 @@
 language: c
 script: autoreconf -i && ./configure --enable-gcov && make && make check
 before_install:
-	- pip install --user cpp-coveralls
+  - pip install --user cpp-coveralls
 after_success:
-	- coveralls
+  - coveralls

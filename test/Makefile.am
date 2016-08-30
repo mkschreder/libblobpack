@@ -1,3 +1,4 @@
+@CODE_COVERAGE_RULES@
 check_PROGRAMS=random
 random_SOURCES=random.c
 random_CFLAGS=-I../src/ -std=c99 

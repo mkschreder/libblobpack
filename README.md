@@ -1,6 +1,7 @@
 Binary Blob Library
 -------------------
 
+[![Build Status](https://travis-ci.org/mkschreder/libblobpack.svg?branch=master)](https://travis-ci.org/mkschreder/libblobpack)
 [![Coverage Status](https://coveralls.io/repos/github/mkschreder/libblobpack/badge.svg?branch=master)](https://coveralls.io/github/mkschreder/libblobpack?branch=master)
 
 Blobpack is a library for packing arbitrary structured data into binary blobs.

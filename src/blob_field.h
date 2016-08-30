@@ -42,7 +42,7 @@ bool blob_field_get_bool(const struct blob_field *self);
 long long int blob_field_get_int(const struct blob_field *self); 
 double blob_field_get_real(const struct blob_field *self); 
 const char *blob_field_get_string(const struct blob_field *self); 
-
+//size_t blob_field_get_binary(const struct blob_field *attr, uint8_t *data, size_t data_size); 
 /*
 uint8_t blob_field_get_u8(const struct blob_field *attr); 
 uint8_t blob_field_set_u8(const struct blob_field *attr, uint8_t val); 

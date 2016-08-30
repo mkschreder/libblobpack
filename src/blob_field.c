@@ -240,11 +240,15 @@ blob_field_get_string(const struct blob_field *attr){
 	return attr->data;
 }
 
-void 
-blob_field_get_raw(const struct blob_field *attr, uint8_t *data, size_t data_size){
+/*
+size_t blob_field_get_raw(const struct blob_field *attr, uint8_t *data, size_t data_size){
 	assert(attr); 
+	size_t s = blob_field_size(attr); 
+	if(data_size > s) data_size = s; 
 	memcpy(data, attr->data, data_size); 
+	return data_size; 
 }
+*/
 
 //! returns the type of the attribute 
 unsigned int blob_field_type(const struct blob_field *attr){

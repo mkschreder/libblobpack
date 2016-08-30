@@ -120,7 +120,9 @@ struct blob_field *blob_put_bool(struct blob *buf, bool val);
 struct blob_field *blob_put_string(struct blob *buf, const char *str); 
 
 //! write binary data into the buffer
-struct blob_field *blob_put_binary(struct blob *buf, const void *data, unsigned int size); 
+// NOTE: binary no longer supported because it is not representable in json and also because for binary data we actually need a whole new field type since we need to use size and our blob size is always padded. 
+// for binary use an array with integers instead
+//struct blob_field *blob_put_binary(struct blob *buf, const void *data, unsigned int size); 
 
 //! write a number into the buffer
 struct blob_field *blob_put_int(struct blob *buf, long long val); 

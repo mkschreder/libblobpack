@@ -248,21 +248,11 @@ struct blob_field *blob_put_real(struct blob *buf, double value){
 
 struct blob_field *blob_put_attr(struct blob *buf, struct blob_field *attr){
 	if(!attr) return NULL; 
-
-	struct blob_field *head = blob_head(buf); 
-	int cur_len = blob_field_raw_pad_len(head); 
-	int attr_pad_len = blob_field_raw_pad_len(attr); 
-	int req_len = cur_len + attr_pad_len;  
-
-	if (!blob_resize(buf, req_len))
-		return NULL;
 	
-	struct blob_field *ret = (struct blob_field*)(buf->buf + cur_len); 
-	memcpy(ret, attr, attr_pad_len);
-
-	blob_field_set_raw_len(blob_head(buf), req_len); 
-
-	return ret; 
+	size_t s =  blob_field_data_len(attr); 
+	struct blob_field *f = blob_new_attr(buf, blob_field_type(attr), s); 
+	memcpy(f, attr, blob_field_raw_pad_len(attr)); 
+	return f; 
 }
 
 static void __attribute__((unused)) _blob_field_dump(struct blob_field *node, int indent){

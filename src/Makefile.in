@@ -320,7 +320,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libblobpack.la
 libblobpack_la_SOURCES = blob.c blob_field.c blob_json.c ujsondec.c ujsonenc.c utils.c
-libblobpack_la_CFLAGS = -std=gnu99 -Wall -Werror
+libblobpack_la_CFLAGS = $(CODE_COVERAGE_CFLAGS) -std=gnu99 -Wall -Werror
 all: all-am
 
 .SUFFIXES:
@@ -682,6 +682,7 @@ uninstall-am: uninstall-libLTLIBRARIES
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-am uninstall uninstall-am uninstall-libLTLIBRARIES
 
+@CODE_COVERAGE_RULES@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

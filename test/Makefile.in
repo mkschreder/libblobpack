@@ -77,7 +77,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = random$(EXEEXT)
+check_PROGRAMS = random$(EXEEXT) read-write$(EXEEXT)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/config/depcomp $(top_srcdir)/config/test-driver
@@ -101,6 +101,12 @@ am__v_lt_1 =
 random_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(random_CFLAGS) $(CFLAGS) \
 	$(random_LDFLAGS) $(LDFLAGS) -o $@
+am_read_write_OBJECTS = read_write-read-write.$(OBJEXT)
+read_write_OBJECTS = $(am_read_write_OBJECTS)
+read_write_LDADD = $(LDADD)
+read_write_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(read_write_CFLAGS) \
+	$(CFLAGS) $(read_write_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -135,8 +141,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(random_SOURCES)
-DIST_SOURCES = $(random_SOURCES)
+SOURCES = $(random_SOURCES) $(read_write_SOURCES)
+DIST_SOURCES = $(random_SOURCES) $(read_write_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -492,6 +498,9 @@ top_srcdir = @top_srcdir@
 random_SOURCES = random.c
 random_CFLAGS = $(CODE_COVERAGE_CFLAGS) -I../src/ -std=c99 
 random_LDFLAGS = $(CODE_COVERAGE_LDFLAGS) -L../src/.libs/ -lblobpack -lm
+read_write_SOURCES = read-write.c
+read_write_CFLAGS = $(CODE_COVERAGE_CFLAGS) -I../src/ -D_GNU_SOURCE -std=c99 
+read_write_LDFLAGS = $(CODE_COVERAGE_LDFLAGS) -L../src/.libs/ -lblobpack -lm
 TESTS = $(check_PROGRAMS)
 all: all-am
 
@@ -541,6 +550,10 @@ random$(EXEEXT): $(random_OBJECTS) $(random_DEPENDENCIES) $(EXTRA_random_DEPENDE
 	@rm -f random$(EXEEXT)
 	$(AM_V_CCLD)$(random_LINK) $(random_OBJECTS) $(random_LDADD) $(LIBS)
 
+read-write$(EXEEXT): $(read_write_OBJECTS) $(read_write_DEPENDENCIES) $(EXTRA_read_write_DEPENDENCIES) 
+	@rm -f read-write$(EXEEXT)
+	$(AM_V_CCLD)$(read_write_LINK) $(read_write_OBJECTS) $(read_write_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -548,6 +561,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random-random.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/read_write-read-write.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -583,6 +597,20 @@ random-random.obj: random.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='random.c' object='random-random.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(random_CFLAGS) $(CFLAGS) -c -o random-random.obj `if test -f 'random.c'; then $(CYGPATH_W) 'random.c'; else $(CYGPATH_W) '$(srcdir)/random.c'; fi`
+
+read_write-read-write.o: read-write.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(read_write_CFLAGS) $(CFLAGS) -MT read_write-read-write.o -MD -MP -MF $(DEPDIR)/read_write-read-write.Tpo -c -o read_write-read-write.o `test -f 'read-write.c' || echo '$(srcdir)/'`read-write.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/read_write-read-write.Tpo $(DEPDIR)/read_write-read-write.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='read-write.c' object='read_write-read-write.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(read_write_CFLAGS) $(CFLAGS) -c -o read_write-read-write.o `test -f 'read-write.c' || echo '$(srcdir)/'`read-write.c
+
+read_write-read-write.obj: read-write.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(read_write_CFLAGS) $(CFLAGS) -MT read_write-read-write.obj -MD -MP -MF $(DEPDIR)/read_write-read-write.Tpo -c -o read_write-read-write.obj `if test -f 'read-write.c'; then $(CYGPATH_W) 'read-write.c'; else $(CYGPATH_W) '$(srcdir)/read-write.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/read_write-read-write.Tpo $(DEPDIR)/read_write-read-write.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='read-write.c' object='read_write-read-write.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(read_write_CFLAGS) $(CFLAGS) -c -o read_write-read-write.obj `if test -f 'read-write.c'; then $(CYGPATH_W) 'read-write.c'; else $(CYGPATH_W) '$(srcdir)/read-write.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -786,6 +814,13 @@ recheck: all $(check_PROGRAMS)
 random.log: random$(EXEEXT)
 	@p='random$(EXEEXT)'; \
 	b='random'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+read-write.log: read-write$(EXEEXT)
+	@p='read-write$(EXEEXT)'; \
+	b='read-write'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

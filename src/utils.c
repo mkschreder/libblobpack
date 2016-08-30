@@ -78,7 +78,7 @@ long double unpack754(uint64_t i, unsigned bits, unsigned expbits){
 
     return result;
 }
-
+/*
 void *__calloc_a(size_t len, ...)
 {
 	va_list ap, ap1;
@@ -105,7 +105,8 @@ void *__calloc_a(size_t len, ...)
 
 	return ret;
 }
-
+*/
+#if 0
 #ifdef __APPLE__
 #include <mach/mach_host.h>		/* host_get_clock_service() */
 #include <mach/mach_port.h>		/* mach_port_deallocate() */
@@ -152,5 +153,5 @@ int clock_gettime(int type, struct timespec *tv)
 out:
 	return retval;
 }
-
+#endif
 #endif

@@ -34,7 +34,7 @@ void blob_field_set_raw_len(struct blob_field *attr, unsigned int len){
 	attr->id_len |= cpu_to_be32(len);
 }
 
-
+/*
 bool blob_field_check_type(const void *ptr, unsigned int len, int type){
 	const char *data = ptr;
 
@@ -54,6 +54,7 @@ bool blob_field_check_type(const void *ptr, unsigned int len, int type){
 
 	return true;
 }
+*/
 
 bool
 blob_field_equal(const struct blob_field *a1, const struct blob_field *a2){
@@ -78,7 +79,7 @@ void *blob_field_data(const struct blob_field *attr){
 	return (void *) attr->data;
 }
 
-
+/*
 struct blob_field *blob_field_copy(struct blob_field *attr){
 	if(!attr) return NULL; 
 	struct blob_field *ret;
@@ -91,46 +92,47 @@ struct blob_field *blob_field_copy(struct blob_field *attr){
 	memcpy(ret, attr, size);
 	return ret;
 }
+*/
 
 uint8_t 
 blob_field_get_u8(const struct blob_field *attr){
 	assert(attr); 
 	return *((uint8_t *) attr->data);
 }
-
+/*
 void blob_field_set_u8(const struct blob_field *attr, uint8_t val){
 	if(!attr) return; 
 	*((uint8_t *) attr->data) = val;
 }
-
+*/
 uint16_t
 blob_field_get_u16(const struct blob_field *attr){
 	assert(attr);
 	uint16_t *tmp = (uint16_t*)attr->data;
 	return be16_to_cpu(*tmp);
 }
-
+/*
 void
 blob_field_set_u16(const struct blob_field *attr, uint16_t val){
 	if(!attr) return; 
 	uint16_t *tmp = (uint16_t*)attr->data;
 	*tmp = cpu_to_be16(val); 
 }
-
+*/
 uint32_t
 blob_field_get_u32(const struct blob_field *attr){
 	assert(attr); 
 	uint32_t *tmp = (uint32_t*)attr->data;
 	return be32_to_cpu(*tmp);
 }
-
+/*
 void
 blob_field_set_u32(const struct blob_field *attr, uint32_t val){
 	if(!attr) return; 
 	uint32_t *tmp = (uint32_t*)attr->data;
 	*tmp = cpu_to_be32(val); 
 }
-
+*/
 uint64_t
 blob_field_get_u64(const struct blob_field *attr){
 	assert(attr); 
@@ -145,37 +147,37 @@ blob_field_get_i8(const struct blob_field *attr){
 	assert(attr); 
 	return blob_field_get_u8(attr);
 }
-
+/*
 void
 blob_field_set_i8(const struct blob_field *attr, int8_t val){
 	if(!attr) return; 
 	blob_field_set_u8(attr, val);
 }
-
+*/
 int16_t
 blob_field_get_i16(const struct blob_field *attr){
 	assert(attr); 
 	return blob_field_get_u16(attr);
 }
-
+/*
 void
 blob_field_set_i16(const struct blob_field *attr, int16_t val){
 	if(!attr) return; 
 	blob_field_set_u16(attr, val);
 }
-
+*/
 int32_t
 blob_field_get_i32(const struct blob_field *attr){
 	assert(attr); 
 	return blob_field_get_u32(attr);
 }
-
+/*
 void
 blob_field_set_i32(const struct blob_field *attr, int32_t val){
 	if(!attr) return;
 	blob_field_set_u32(attr, val);
 }
-
+*/
 int64_t
 blob_field_get_i64(const struct blob_field *attr){
 	assert(attr); 
@@ -200,6 +202,7 @@ long long blob_field_get_int(const struct blob_field *self){
 		case BLOB_FIELD_INT8: return blob_field_get_i8(self); 
 		case BLOB_FIELD_INT16: return blob_field_get_i16(self); 
 		case BLOB_FIELD_INT32: return blob_field_get_i32(self); 
+		case BLOB_FIELD_INT64: return blob_field_get_i64(self); 
 		case BLOB_FIELD_FLOAT32: return blob_field_get_f32(self); 
 		case BLOB_FIELD_FLOAT64: return blob_field_get_f64(self); 
 		case BLOB_FIELD_STRING: {
@@ -218,6 +221,7 @@ double blob_field_get_real(const struct blob_field *self){
 		case BLOB_FIELD_INT8: return blob_field_get_i8(self); 
 		case BLOB_FIELD_INT16: return blob_field_get_i16(self); 
 		case BLOB_FIELD_INT32: return blob_field_get_i32(self); 
+		case BLOB_FIELD_INT64: return blob_field_get_i64(self); 
 		case BLOB_FIELD_FLOAT32: return blob_field_get_f32(self); 
 		case BLOB_FIELD_FLOAT64: return blob_field_get_f64(self); 
 		case BLOB_FIELD_STRING: {
@@ -256,14 +260,14 @@ unsigned int blob_field_type(const struct blob_field *attr){
 	int id = (be32_to_cpu(attr->id_len) & BLOB_FIELD_ID_MASK) >> BLOB_FIELD_ID_SHIFT;
 	return id;
 }
-
+/*
 void blob_field_set_type(struct blob_field *self, int type){
 	assert(self); 
 	int id_len = be32_to_cpu(self->id_len); 
 	id_len = (id_len & ~BLOB_FIELD_ID_MASK) | (type << BLOB_FIELD_ID_SHIFT); 	
 	self->id_len = cpu_to_be32(id_len);
 }
-
+*/
 //! returns full length of attribute
 unsigned int
 blob_field_raw_len(const struct blob_field *attr){

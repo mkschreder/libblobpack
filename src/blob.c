@@ -141,7 +141,7 @@ static struct blob_field *blob_new_attr(struct blob *buf, int id, int payload){
 
 	return attr;
 }
-
+/*
 struct blob_field *blob_put_binary(struct blob *buf, const void *ptr, unsigned int len){
 	assert(ptr); 
 	struct blob_field *attr;
@@ -156,7 +156,7 @@ struct blob_field *blob_put_binary(struct blob *buf, const void *ptr, unsigned i
 	memcpy(attr->data, ptr, len);
 	return attr;
 }
-
+*/
 static struct blob_field *blob_put(struct blob *buf, int id, const void *ptr, unsigned int len){
 	struct blob_field *attr;
 
@@ -310,6 +310,6 @@ void blob_dump(struct blob *self){
 	printf("size: %d, memory: %d\n", (int)blob_size(self), (int)self->memlen);
 	for(int c = 0; c < 8; c++) printf("%02x ", ((char*)self->buf)[c] & 0xff); 
 	printf("\n"); 
-	_blob_field_dump(blob_head(self), 0); 
+	blob_field_dump(blob_head(self)); 
 	printf("============================\n"); 
 }

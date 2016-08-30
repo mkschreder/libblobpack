@@ -13,10 +13,23 @@ int main(){
 	blob_put_bool(&blob, true); 
 	blob_put_string(&blob, "foo"); 
 	blob_put_int(&blob, -13); 
+	blob_put_int(&blob, 100); 
+	blob_put_int(&blob, 200); 
+	blob_put_int(&blob, 1000); 
+	blob_put_int(&blob, 70000); 
+	blob_put_string(&blob, "70000"); 
+	blob_put_real(&blob, 70000.0f); 
+	blob_put_int(&blob, 100); 
+	blob_put_int(&blob, 200); 
+	blob_put_int(&blob, 1000); 
+	blob_put_string(&blob, "3.14"); 
+	blob_put_int(&blob, 5000000000lu); 
 	blob_put_real(&blob, M_PI); 
 	
 	struct blob_field *f = blob_put_string(&blob, "copyme"); 
-	blob_put_attr(&blob, f); 
+	struct blob_field *f2 = blob_put_attr(&blob, f); 
+	
+	TEST(blob_field_equal(f, f2));  
 
 	blob_offset_t o = blob_open_table(&blob); 
 	blob_put_string(&blob, "one"); 
@@ -41,7 +54,18 @@ int main(){
 	TEST(blob_field_get_bool(child) == true); 
 	TEST(strcmp(blob_field_get_string(child = blob_field_next_child(root, child)), "foo") == 0); 
 	TEST(blob_field_get_int(child = blob_field_next_child(root, child)) == -13); 
-	TEST(blob_field_get_real(child = blob_field_next_child(root, child)) == M_PI); 
+	TEST(blob_field_get_int(child = blob_field_next_child(root, child)) == 100); 
+	TEST(blob_field_get_int(child = blob_field_next_child(root, child)) == 200); 
+	TEST(blob_field_get_int(child = blob_field_next_child(root, child)) == 1000); 
+	TEST(blob_field_get_int(child = blob_field_next_child(root, child)) == 70000); 
+	TEST(blob_field_get_int(child = blob_field_next_child(root, child)) == 70000); 
+	TEST(blob_field_get_int(child = blob_field_next_child(root, child)) == 70000); 
+	TEST(blob_field_get_real(child = blob_field_next_child(root, child)) == 100); 
+	TEST(blob_field_get_real(child = blob_field_next_child(root, child)) == 200); 
+	TEST(blob_field_get_real(child = blob_field_next_child(root, child)) == 1000); 
+	TEST(is_equal(blob_field_get_real(child = blob_field_next_child(root, child)), 3.14f)); 
+	TEST(blob_field_get_int(child = blob_field_next_child(root, child)) == 5000000000lu); 
+	TEST(is_equal(blob_field_get_real(child = blob_field_next_child(root, child)), M_PI)); 
 
 	TEST(strcmp(blob_field_get_string(child = blob_field_next_child(root, child)), "copyme") == 0); 
 	TEST(strcmp(blob_field_get_string(child = blob_field_next_child(root, child)), "copyme") == 0); 

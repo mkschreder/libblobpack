@@ -77,7 +77,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = random$(EXEEXT) read-write$(EXEEXT) json$(EXEEXT)
+check_PROGRAMS = random$(EXEEXT) read-write$(EXEEXT) json$(EXEEXT) \
+	parse$(EXEEXT)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/config/depcomp $(top_srcdir)/config/test-driver
@@ -101,6 +102,12 @@ am__v_lt_1 =
 json_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(json_CFLAGS) $(CFLAGS) \
 	$(json_LDFLAGS) $(LDFLAGS) -o $@
+am_parse_OBJECTS = parse-parse.$(OBJEXT)
+parse_OBJECTS = $(am_parse_OBJECTS)
+parse_LDADD = $(LDADD)
+parse_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(parse_CFLAGS) $(CFLAGS) \
+	$(parse_LDFLAGS) $(LDFLAGS) -o $@
 am_random_OBJECTS = random-random.$(OBJEXT)
 random_OBJECTS = $(am_random_OBJECTS)
 random_LDADD = $(LDADD)
@@ -147,8 +154,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(json_SOURCES) $(random_SOURCES) $(read_write_SOURCES)
-DIST_SOURCES = $(json_SOURCES) $(random_SOURCES) $(read_write_SOURCES)
+SOURCES = $(json_SOURCES) $(parse_SOURCES) $(random_SOURCES) \
+	$(read_write_SOURCES)
+DIST_SOURCES = $(json_SOURCES) $(parse_SOURCES) $(random_SOURCES) \
+	$(read_write_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -510,6 +519,9 @@ read_write_LDFLAGS = $(CODE_COVERAGE_LDFLAGS) -L../src/.libs/ -lblobpack -lm
 json_SOURCES = json.c
 json_CFLAGS = $(CODE_COVERAGE_CFLAGS) -I../src/ -D_GNU_SOURCE -std=c99 
 json_LDFLAGS = $(CODE_COVERAGE_LDFLAGS) -L../src/.libs/ -lblobpack -lm
+parse_SOURCES = parse.c
+parse_CFLAGS = $(CODE_COVERAGE_CFLAGS) -I../src/ -D_GNU_SOURCE -std=c99 
+parse_LDFLAGS = $(CODE_COVERAGE_LDFLAGS) -L../src/.libs/ -lblobpack -lm
 TESTS = $(check_PROGRAMS)
 all: all-am
 
@@ -559,6 +571,10 @@ json$(EXEEXT): $(json_OBJECTS) $(json_DEPENDENCIES) $(EXTRA_json_DEPENDENCIES)
 	@rm -f json$(EXEEXT)
 	$(AM_V_CCLD)$(json_LINK) $(json_OBJECTS) $(json_LDADD) $(LIBS)
 
+parse$(EXEEXT): $(parse_OBJECTS) $(parse_DEPENDENCIES) $(EXTRA_parse_DEPENDENCIES) 
+	@rm -f parse$(EXEEXT)
+	$(AM_V_CCLD)$(parse_LINK) $(parse_OBJECTS) $(parse_LDADD) $(LIBS)
+
 random$(EXEEXT): $(random_OBJECTS) $(random_DEPENDENCIES) $(EXTRA_random_DEPENDENCIES) 
 	@rm -f random$(EXEEXT)
 	$(AM_V_CCLD)$(random_LINK) $(random_OBJECTS) $(random_LDADD) $(LIBS)
@@ -574,6 +590,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/json-json.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parse-parse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random-random.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/read_write-read-write.Po@am__quote@
 
@@ -611,6 +628,20 @@ json-json.obj: json.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='json.c' object='json-json.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(json_CFLAGS) $(CFLAGS) -c -o json-json.obj `if test -f 'json.c'; then $(CYGPATH_W) 'json.c'; else $(CYGPATH_W) '$(srcdir)/json.c'; fi`
+
+parse-parse.o: parse.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(parse_CFLAGS) $(CFLAGS) -MT parse-parse.o -MD -MP -MF $(DEPDIR)/parse-parse.Tpo -c -o parse-parse.o `test -f 'parse.c' || echo '$(srcdir)/'`parse.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/parse-parse.Tpo $(DEPDIR)/parse-parse.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='parse.c' object='parse-parse.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(parse_CFLAGS) $(CFLAGS) -c -o parse-parse.o `test -f 'parse.c' || echo '$(srcdir)/'`parse.c
+
+parse-parse.obj: parse.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(parse_CFLAGS) $(CFLAGS) -MT parse-parse.obj -MD -MP -MF $(DEPDIR)/parse-parse.Tpo -c -o parse-parse.obj `if test -f 'parse.c'; then $(CYGPATH_W) 'parse.c'; else $(CYGPATH_W) '$(srcdir)/parse.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/parse-parse.Tpo $(DEPDIR)/parse-parse.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='parse.c' object='parse-parse.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(parse_CFLAGS) $(CFLAGS) -c -o parse-parse.obj `if test -f 'parse.c'; then $(CYGPATH_W) 'parse.c'; else $(CYGPATH_W) '$(srcdir)/parse.c'; fi`
 
 random-random.o: random.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(random_CFLAGS) $(CFLAGS) -MT random-random.o -MD -MP -MF $(DEPDIR)/random-random.Tpo -c -o random-random.o `test -f 'random.c' || echo '$(srcdir)/'`random.c
@@ -856,6 +887,13 @@ read-write.log: read-write$(EXEEXT)
 json.log: json$(EXEEXT)
 	@p='json$(EXEEXT)'; \
 	b='json'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+parse.log: parse$(EXEEXT)
+	@p='parse$(EXEEXT)'; \
+	b='parse'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

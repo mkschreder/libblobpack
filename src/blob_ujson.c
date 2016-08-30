@@ -166,6 +166,23 @@ bool blob_put_json(struct blob *self, const char *json){
 	return true;
 }
 
+bool blob_init_from_json(struct blob *self, const char *json){
+	struct blob b; 
+	blob_init(&b, 0, 0); 
+	bool r = blob_put_json(&b, json); 
+	if(!r) {
+		blob_free(&b); 
+		return false; 
+	}
+	blob_init(self, 0, 0); 
+	struct blob_field *child; 
+	blob_field_for_each_child(blob_field_first_child(blob_head(&b)), child){
+		blob_put_attr(self, child); 
+	}
+	blob_free(&b); 
+	return true; 
+}
+
 bool blob_put_json_from_file(struct blob *self, const char *file){
 	// this is a rather simplistic approach where we just load the whole file into memory and then parse the buffer. 
 	// there can probably be better ways where we parse data in place.. 

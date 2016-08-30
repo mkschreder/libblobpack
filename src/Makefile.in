@@ -123,8 +123,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libblobpack_la_LIBADD =
 am_libblobpack_la_OBJECTS = libblobpack_la-blob.lo \
 	libblobpack_la-blob_field.lo libblobpack_la-blob_json.lo \
-	libblobpack_la-ujsondec.lo libblobpack_la-ujsonenc.lo \
-	libblobpack_la-utils.lo
+	libblobpack_la-blob_ujson.lo libblobpack_la-ujsondec.lo \
+	libblobpack_la-ujsonenc.lo libblobpack_la-utils.lo
 libblobpack_la_OBJECTS = $(am_libblobpack_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -319,7 +319,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libblobpack.la
-libblobpack_la_SOURCES = blob.c blob_field.c blob_json.c ujsondec.c ujsonenc.c utils.c
+libblobpack_la_SOURCES = blob.c blob_field.c blob_json.c blob_ujson.c ujsondec.c ujsonenc.c utils.c
 libblobpack_la_CFLAGS = $(CODE_COVERAGE_CFLAGS) -std=gnu99 -Wall -Werror
 all: all-am
 
@@ -403,6 +403,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libblobpack_la-blob.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libblobpack_la-blob_field.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libblobpack_la-blob_json.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libblobpack_la-blob_ujson.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libblobpack_la-ujsondec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libblobpack_la-ujsonenc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libblobpack_la-utils.Plo@am__quote@
@@ -448,6 +449,13 @@ libblobpack_la-blob_json.lo: blob_json.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='blob_json.c' object='libblobpack_la-blob_json.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libblobpack_la_CFLAGS) $(CFLAGS) -c -o libblobpack_la-blob_json.lo `test -f 'blob_json.c' || echo '$(srcdir)/'`blob_json.c
+
+libblobpack_la-blob_ujson.lo: blob_ujson.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libblobpack_la_CFLAGS) $(CFLAGS) -MT libblobpack_la-blob_ujson.lo -MD -MP -MF $(DEPDIR)/libblobpack_la-blob_ujson.Tpo -c -o libblobpack_la-blob_ujson.lo `test -f 'blob_ujson.c' || echo '$(srcdir)/'`blob_ujson.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libblobpack_la-blob_ujson.Tpo $(DEPDIR)/libblobpack_la-blob_ujson.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='blob_ujson.c' object='libblobpack_la-blob_ujson.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libblobpack_la_CFLAGS) $(CFLAGS) -c -o libblobpack_la-blob_ujson.lo `test -f 'blob_ujson.c' || echo '$(srcdir)/'`blob_ujson.c
 
 libblobpack_la-ujsondec.lo: ujsondec.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libblobpack_la_CFLAGS) $(CFLAGS) -MT libblobpack_la-ujsondec.lo -MD -MP -MF $(DEPDIR)/libblobpack_la-ujsondec.Tpo -c -o libblobpack_la-ujsondec.lo `test -f 'ujsondec.c' || echo '$(srcdir)/'`ujsondec.c

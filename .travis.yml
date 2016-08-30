@@ -1,6 +1,6 @@
 language: c
 install:
   - pip install --user cpp-coveralls
-script: autoreconf && ./configure --enable-code-coverage && make && make check
+script: autoreconf -if && ./configure --enable-code-coverage && make && make check
 after_success:
   - coveralls

@@ -85,12 +85,12 @@ JSOBJ Object_newNull(void *prv){
 
 JSOBJ Object_newObject(void *prv){	
 	DEBUG("new object\n"); 
-	return blob_open_table(prv);
+	return (JSOBJ)blob_open_table(prv);
 }
 
 JSOBJ Object_newArray(void *prv){
 	DEBUG("new array\n"); 
-	return blob_open_array(prv); 
+	return (JSOBJ)blob_open_array(prv); 
 }
 
 JSOBJ Object_newInteger(void *prv, JSINT32 value){
@@ -116,7 +116,7 @@ JSOBJ Object_newDouble(void *prv, double value){
 static void Object_releaseObject(void *prv, JSOBJ obj){
 	DEBUG("close array\n"); 
 	// with blobs close_table and close_array is the same function
-	blob_close_table(prv, obj); 
+	blob_close_table(prv, (blob_offset_t)obj); 
 }
 
 static void *Object_Malloc(size_t size){
@@ -186,6 +186,8 @@ bool blob_init_from_json(struct blob *self, const char *json){
 }
 
 #ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#include <fcntl.h>
 bool blob_put_json_from_file(struct blob *self, const char *file){
 	// this is a rather simplistic approach where we just load the whole file into memory and then parse the buffer. 
 	// there can probably be better ways where we parse data in place.. 

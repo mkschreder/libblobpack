@@ -39,7 +39,7 @@ static inline blob_offset_t blob_field_to_offset(struct blob *buf, struct blob_f
 	return (blob_offset_t)((char *)attr - (char *) buf->buf);
 }
 
-static void blob_field_init(struct blob_field *attr, int id, unsigned int len){
+static void blob_field_init(struct blob_field *attr, uint32_t id, uint32_t len){
 	assert(attr); 
 	memset(attr, 0, sizeof(struct blob_field)); 
 	//len += sizeof(struct blob_field); 
@@ -213,7 +213,7 @@ blob_offset_t blob_open_array(struct blob *buf){
 }
 
 void blob_close_array(struct blob *buf, blob_offset_t offset){
-	if((unsigned long)offset > blob_size(buf)) return; 
+	if((int)offset > blob_size(buf)) return; 
 	struct blob_field *attr = blob_offset_to_attr(buf, offset);
 	int len = (buf->buf + blob_field_raw_len(blob_head(buf))) - (void*)attr; 
 	blob_field_set_raw_len(attr, len);
@@ -225,7 +225,7 @@ blob_offset_t blob_open_table(struct blob *buf){
 }
 
 void blob_close_table(struct blob *buf, blob_offset_t offset){
-	if((unsigned long)offset > blob_size(buf)) return; 
+	if((int)offset > blob_size(buf)) return; 
 	struct blob_field *attr = blob_offset_to_attr(buf, offset);
 	int len = (buf->buf + blob_field_raw_len(blob_head(buf))) - (void*)attr; 
 	blob_field_set_raw_len(attr, len);

@@ -41,9 +41,9 @@ http://www.opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
 #include "blobpack.h"
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <sys/stat.h>
 #include "ujson.h"
 
 #define DEBUG(...) {}
@@ -57,13 +57,15 @@ void Object_arrayAddItem(void *prv, JSOBJ obj, JSOBJ value){
 	DEBUG("new array item \n"); 
 }
 
-JSOBJ Object_newString(void *prv, wchar_t *start, wchar_t *end){
+JSOBJ Object_newString(void *prv, char *start, char *end){
 	size_t len = end - start + 1; 
-	char *str = alloca(len); 
+	char *str = malloc(len); 
 	memset(str, 0, len); 
-	wcstombs(str, start, end - start); 
+	strncpy(str, start, end - start); 
 	DEBUG("new string %s\n", str); 
-	return blob_put_string(prv, str);  
+	void* ret = blob_put_string(prv, str);  
+	free(str); 
+	return ret; 
 }
 
 JSOBJ Object_newTrue(void *prv){
@@ -183,6 +185,7 @@ bool blob_init_from_json(struct blob *self, const char *json){
 	return true; 
 }
 
+#ifdef HAVE_UNISTD_H
 bool blob_put_json_from_file(struct blob *self, const char *file){
 	// this is a rather simplistic approach where we just load the whole file into memory and then parse the buffer. 
 	// there can probably be better ways where we parse data in place.. 
@@ -193,13 +196,15 @@ bool blob_put_json_from_file(struct blob *self, const char *file){
 	file_size = lseek(fd, SEEK_END, 0); 
 	if(file_size > 1000000UL) { close(fd); return false; }
 	lseek(fd, SEEK_SET, 0); 	
-	char *buffer = alloca(file_size + 1); // allocate on stack
+	char *buffer = malloc(file_size + 1); // allocate on stack
 	memset(buffer, 0, file_size + 1); 
 	if(file_size != read(fd, buffer, file_size)){
 		close(fd); 
 		return false; 
 	}
 	close(fd); 
-	return blob_put_json(self, buffer); 
+	int ret = blob_put_json(self, buffer); 
+	free(buffer); 
+	return ret; 
 }
-
+#endif

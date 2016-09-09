@@ -13,5 +13,10 @@ LT_INIT
 
 AC_PROG_CC
 
+AC_CHECK_HEADER([unistd.h],
+                     [AC_DEFINE([HAVE_UNISTD_H], [1],
+                        [Define to 1 if you have <unistd.h>.])],
+                     [])
+
 AC_OUTPUT(Makefile src/Makefile test/Makefile)
 

@@ -54,7 +54,6 @@ tree doesn't have cyclic references.
 #define __ULTRAJSON_H__
 
 #include <stdio.h>
-#include <wchar.h>
 
 // Don't output any extra whitespaces when encoding
 #define JSON_NO_EXTRA_WHITESPACE
@@ -77,7 +76,7 @@ tree doesn't have cyclic references.
 /*
 Dictates and limits how much stack space for buffers UltraJSON will use before resorting to provided heap functions */
 #ifndef JSON_MAX_STACK_BUFFER_SIZE
-#define JSON_MAX_STACK_BUFFER_SIZE 131072
+#define JSON_MAX_STACK_BUFFER_SIZE 64
 #endif
 
 #ifdef _WIN32
@@ -300,7 +299,7 @@ EXPORTFUNCTION char *JSON_EncodeObject(JSOBJ obj, JSONObjectEncoder *enc, char *
 
 typedef struct __JSONObjectDecoder
 {
-  JSOBJ (*newString)(void *prv, wchar_t *start, wchar_t *end);
+  JSOBJ (*newString)(void *prv, char *start, char *end);
   void (*objectAddKey)(void *prv, JSOBJ obj, JSOBJ name, JSOBJ value);
   void (*arrayAddItem)(void *prv, JSOBJ obj, JSOBJ value);
   JSOBJ (*newTrue)(void *prv);

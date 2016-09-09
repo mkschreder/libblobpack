@@ -239,13 +239,13 @@ static void blob_format_element(struct strbuf *s, struct blob_field *attr, bool 
 		sprintf(buf, "%d", be16_to_cpu(*(uint16_t *)data));
 		break;
 	case BLOB_FIELD_INT32:
-		sprintf(buf, "%d", (int32_t) be32_to_cpu(*(uint32_t *)data));
+		sprintf(buf, "%lu", (int32_t) be32_to_cpu(*(uint32_t *)data));
 		break;
 	case BLOB_FIELD_INT64:
-		sprintf(buf, "%" PRId64, (int64_t) be64_to_cpu(*(uint64_t *)data));
+		sprintf(buf, "%llu", (int64_t) be64_to_cpu(*(uint64_t *)data));
 		break;
 	case BLOB_FIELD_FLOAT32: 
-		sprintf(buf, "%f", (float) unpack754_32(be32_to_cpu(*(uint32_t*)data))); 
+		sprintf(buf, "%f", (double) unpack754_32(be32_to_cpu(*(uint32_t*)data))); 
 		break; 
 	case BLOB_FIELD_FLOAT64: 
 		sprintf(buf, "%Le", unpack754_64(be64_to_cpu(*(uint64_t*)data))); 

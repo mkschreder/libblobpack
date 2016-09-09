@@ -42,8 +42,12 @@ http://www.opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-
+#include <limits.h>
 #include <float.h>
+
+#ifndef HUGE_VAL
+#define HUGE_VAL INT_MAX
+#endif
 
 #ifndef TRUE
 #define TRUE 1
@@ -344,7 +348,7 @@ int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char 
         memcpy(&in8, io + 2, sizeof(JSUINT8));
 #ifdef __LITTLE_ENDIAN__
         in = (JSUTF32) in16;
-        in |= in8 << 16;
+        in |= (JSUTF32)in8 << 16;
         ucs = ((in & 0x0f) << 12) | ((in & 0x3f00) >> 2) | ((in & 0x3f0000) >> 16);
 #else
         in = in16 << 8;

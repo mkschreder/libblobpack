@@ -41,7 +41,6 @@ http://www.opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
 #include <assert.h>
 #include <string.h>
 #include <limits.h>
-#include <wchar.h>
 #include <stdlib.h>
 #include <errno.h>
 
@@ -57,8 +56,8 @@ struct DecoderState
 {
 	char *start;
 	char *end;
-	wchar_t *escStart;
-	wchar_t *escEnd;
+	char *escStart;
+	char *escEnd;
 	int escHeap;
 	int lastType;
 	JSUINT32 objDepth;
@@ -427,8 +426,8 @@ JSOBJ decode_string ( struct DecoderState *ds)
 	JSUTF16 sur[2] = { 0 };
 	int iSur = 0;
 	int index;
-	wchar_t *escOffset;
-	wchar_t *escStart;
+	char *escOffset;
+	char *escStart;
 	size_t escLen = (ds->escEnd - ds->escStart);
 	JSUINT8 *inputOffset;
 	JSUINT8 oct;
@@ -442,11 +441,11 @@ JSOBJ decode_string ( struct DecoderState *ds)
 
 		if (ds->escHeap)
 		{
-			if (newSize > (SIZE_MAX / sizeof(wchar_t)))
+			if (newSize > (SIZE_MAX / sizeof(char)))
 			{
 				return SetError(ds, -1, "Could not reserve memory block");
 			}
-			escStart = (wchar_t *)ds->dec->realloc(ds->escStart, newSize * sizeof(wchar_t));
+			escStart = (char *)ds->dec->realloc(ds->escStart, newSize * sizeof(char));
 			if (!escStart)
 			{
 				ds->dec->free(ds->escStart);
@@ -456,18 +455,18 @@ JSOBJ decode_string ( struct DecoderState *ds)
 		}
 		else
 		{
-			wchar_t *oldStart = ds->escStart;
-			if (newSize > (SIZE_MAX / sizeof(wchar_t)))
+			char *oldStart = ds->escStart;
+			if (newSize > (SIZE_MAX / sizeof(char)))
 			{
 				return SetError(ds, -1, "Could not reserve memory block");
 			}
-			ds->escStart = (wchar_t *) ds->dec->malloc(newSize * sizeof(wchar_t));
+			ds->escStart = (char *) ds->dec->malloc(newSize * sizeof(char));
 			if (!ds->escStart)
 			{
 				return SetError(ds, -1, "Could not reserve memory block");
 			}
 			ds->escHeap = 1;
-			memcpy(ds->escStart, oldStart, escLen * sizeof(wchar_t));
+			memcpy(ds->escStart, oldStart, escLen * sizeof(char));
 		}
 
 		ds->escEnd = ds->escStart + newSize;
@@ -563,7 +562,7 @@ JSOBJ decode_string ( struct DecoderState *ds)
 								iSur ++;
 								break;
 							}
-							(*escOffset++) = (wchar_t) sur[iSur];
+							(*escOffset++) = (char) sur[iSur];
 							iSur = 0;
 						}
 						else
@@ -574,10 +573,10 @@ JSOBJ decode_string ( struct DecoderState *ds)
 								return SetError (ds, -1, "Unpaired high surrogate when decoding 'string'");
 							}
 #if WCHAR_MAX == 0xffff
-							(*escOffset++) = (wchar_t) sur[0];
-							(*escOffset++) = (wchar_t) sur[1];
+							(*escOffset++) = (char) sur[0];
+							(*escOffset++) = (char) sur[1];
 #else
-							(*escOffset++) = (wchar_t) 0x10000 + (((sur[0] - 0xd800) << 10) | (sur[1] - 0xdc00));
+							(*escOffset++) = (char) 0x10000 + (((sur[0] - 0xd800) << 10) | (sur[1] - 0xdc00));
 #endif
 							iSur = 0;
 						}
@@ -591,7 +590,7 @@ JSOBJ decode_string ( struct DecoderState *ds)
 
 			case 1:
 			{
-				*(escOffset++) = (wchar_t) (*inputOffset++);
+				*(escOffset++) = (char) (*inputOffset++);
 				break;
 			}
 
@@ -605,7 +604,7 @@ JSOBJ decode_string ( struct DecoderState *ds)
 				}
 				ucs |= (*inputOffset++) & 0x3f;
 				if (ucs < 0x80) return SetError (ds, -1, "Overlong 2 byte UTF-8 sequence detected when decoding 'string'");
-				*(escOffset++) = (wchar_t) ucs;
+				*(escOffset++) = (char) ucs;
 				break;
 			}
 
@@ -628,7 +627,7 @@ JSOBJ decode_string ( struct DecoderState *ds)
 				}
 
 				if (ucs < 0x800) return SetError (ds, -1, "Overlong 3 byte UTF-8 sequence detected when encoding string");
-				*(escOffset++) = (wchar_t) ucs;
+				*(escOffset++) = (char) ucs;
 				break;
 			}
 
@@ -656,15 +655,15 @@ JSOBJ decode_string ( struct DecoderState *ds)
 				if (ucs >= 0x10000)
 				{
 					ucs -= 0x10000;
-					*(escOffset++) = (wchar_t) (ucs >> 10) + 0xd800;
-					*(escOffset++) = (wchar_t) (ucs & 0x3ff) + 0xdc00;
+					*(escOffset++) = (char) (ucs >> 10) + 0xd800;
+					*(escOffset++) = (char) (ucs & 0x3ff) + 0xdc00;
 				}
 				else
 				{
-					*(escOffset++) = (wchar_t) ucs;
+					*(escOffset++) = (char) ucs;
 				}
 #else
-				*(escOffset++) = (wchar_t) ucs;
+				*(escOffset++) = (char) ucs;
 #endif
 				break;
 			}
@@ -866,14 +865,14 @@ JSOBJ JSON_DecodeObject(JSONObjectDecoder *dec, const char *buffer, size_t cbBuf
 	/*
 	FIXME: Base the size of escBuffer of that of cbBuffer so that the unicode escaping doesn't run into the wall each time */
 	struct DecoderState ds;
-	wchar_t escBuffer[(JSON_MAX_STACK_BUFFER_SIZE / sizeof(wchar_t))];
+	char escBuffer[(JSON_MAX_STACK_BUFFER_SIZE / sizeof(char))];
 	JSOBJ ret;
 
 	ds.start = (char *) buffer;
 	ds.end = ds.start + cbBuffer;
 
 	ds.escStart = escBuffer;
-	ds.escEnd = ds.escStart + (JSON_MAX_STACK_BUFFER_SIZE / sizeof(wchar_t));
+	ds.escEnd = ds.escStart + (JSON_MAX_STACK_BUFFER_SIZE / sizeof(char));
 	ds.escHeap = 0;
 	ds.prv = dec->prv;
 	ds.dec = dec;

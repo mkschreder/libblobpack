@@ -19,11 +19,9 @@
 #ifndef __LIBUBOX_UTILS_H
 #define __LIBUBOX_UTILS_H
 
-#include <sys/types.h>
-#include <sys/time.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <time.h>
+#include <stdlib.h>
 
 /*
  * calloc_a(size_t len, [void **addr, size_t len,...], NULL)
@@ -85,6 +83,9 @@ int clock_gettime(int type, struct timespec *tv);
 #include <sys/endian.h>
 #define bswap_32(x) bswap32(x)
 #define bswap_64(x) bswap64(x)
+#elif defined(__AVR)
+#define __LITTLE_ENDIAN 1234
+#define __BYTE_ORDER __LITTLE_ENDIAN
 #else
 #include <machine/endian.h>
 #define bswap_32(x) swap32(x)

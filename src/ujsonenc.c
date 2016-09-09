@@ -116,7 +116,7 @@ static void SetError (JSOBJ obj, JSONObjectEncoder *enc, const char *message)
 /*
 FIXME: Keep track of how big these get across several encoder calls and try to make an estimate
 That way we won't run our head into the wall each call */
-void Buffer_Realloc (JSONObjectEncoder *enc, size_t cbNeeded)
+static void Buffer_Realloc (JSONObjectEncoder *enc, size_t cbNeeded)
 {
   size_t curSize = enc->end - enc->start;
   size_t newSize = curSize * 2;
@@ -152,14 +152,14 @@ void Buffer_Realloc (JSONObjectEncoder *enc, size_t cbNeeded)
   enc->end = enc->start + newSize;
 }
 
-void FASTCALL_MSVC Buffer_AppendShortHexUnchecked (char *outputOffset, unsigned short value){
+static void FASTCALL_MSVC Buffer_AppendShortHexUnchecked (char *outputOffset, unsigned short value){
   *(outputOffset++) = g_hexChars[(value & 0xf000) >> 12];
   *(outputOffset++) = g_hexChars[(value & 0x0f00) >> 8];
   *(outputOffset++) = g_hexChars[(value & 0x00f0) >> 4];
   *(outputOffset++) = g_hexChars[(value & 0x000f) >> 0];
 }
 
-int Buffer_EscapeStringUnvalidated (JSONObjectEncoder *enc, const char *io, const char *end)
+static int Buffer_EscapeStringUnvalidated (JSONObjectEncoder *enc, const char *io, const char *end)
 {
   char *of = (char *) enc->offset;
 
@@ -262,7 +262,7 @@ int Buffer_EscapeStringUnvalidated (JSONObjectEncoder *enc, const char *io, cons
   }
 }
 
-int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char *io, const char *end)
+static int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char *io, const char *end)
 {
   JSUTF32 ucs;
   char *of = (char *) enc->offset;
@@ -440,8 +440,8 @@ int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char 
       {
         if (enc->escapeForwardSlashes)
         {
-          *(of++) = *( (char *) (g_escapeChars + utflen + 0));
-          *(of++) = *( (char *) (g_escapeChars + utflen + 1));
+          *(of++) = *( (const char *) (g_escapeChars + utflen + 0));
+          *(of++) = *( (const char *) (g_escapeChars + utflen + 1));
           io ++;
         }
         else
@@ -500,12 +500,12 @@ static void strreverse(char* begin, char* end){
   aux = *end, *end-- = *begin, *begin++ = aux;
 }
 
-void Buffer_AppendIndentNewlineUnchecked(JSONObjectEncoder *enc)
+static void Buffer_AppendIndentNewlineUnchecked(JSONObjectEncoder *enc)
 {
   if (enc->indent > 0) Buffer_AppendCharUnchecked(enc, '\n');
 }
 
-void Buffer_AppendIndentUnchecked(JSONObjectEncoder *enc, JSINT32 value)
+static void Buffer_AppendIndentUnchecked(JSONObjectEncoder *enc, JSINT32 value)
 {
   int i;
   if (enc->indent > 0)
@@ -514,7 +514,7 @@ void Buffer_AppendIndentUnchecked(JSONObjectEncoder *enc, JSINT32 value)
         Buffer_AppendCharUnchecked(enc, ' ');
 }
 
-void Buffer_AppendIntUnchecked(JSONObjectEncoder *enc, JSINT32 value)
+static void Buffer_AppendIntUnchecked(JSONObjectEncoder *enc, JSINT32 value)
 {
   char* wstr;
   JSUINT32 uvalue = (value < 0) ? -value : value;
@@ -530,7 +530,7 @@ void Buffer_AppendIntUnchecked(JSONObjectEncoder *enc, JSINT32 value)
   enc->offset += (wstr - (enc->offset));
 }
 
-void Buffer_AppendLongUnchecked(JSONObjectEncoder *enc, JSINT64 value)
+static void Buffer_AppendLongUnchecked(JSONObjectEncoder *enc, JSINT64 value)
 {
   char* wstr;
   JSUINT64 uvalue = (value < 0) ? -value : value;
@@ -546,7 +546,7 @@ void Buffer_AppendLongUnchecked(JSONObjectEncoder *enc, JSINT64 value)
   enc->offset += (wstr - (enc->offset));
 }
 
-void Buffer_AppendUnsignedLongUnchecked(JSONObjectEncoder *enc, JSUINT64 value)
+static void Buffer_AppendUnsignedLongUnchecked(JSONObjectEncoder *enc, JSUINT64 value)
 {
   char* wstr;
   JSUINT64 uvalue = value;
@@ -561,7 +561,7 @@ void Buffer_AppendUnsignedLongUnchecked(JSONObjectEncoder *enc, JSUINT64 value)
   enc->offset += (wstr - (enc->offset));
 }
 
-int Buffer_AppendDoubleUnchecked(JSOBJ obj, JSONObjectEncoder *enc, double value)
+static int Buffer_AppendDoubleUnchecked(JSOBJ obj, JSONObjectEncoder *enc, double value)
 {
   /* if input is larger than thres_max, revert to exponential */
   const double thres_max = (double) 1e16 - 1;
@@ -709,7 +709,7 @@ Handle integration functions returning NULL here */
 FIXME:
 Perhaps implement recursion detection */
 
-void encode(JSOBJ obj, JSONObjectEncoder *enc, const char *name, size_t cbName)
+static void encode(JSOBJ obj, JSONObjectEncoder *enc, const char *name, size_t cbName)
 {
   const char *value;
   char *objName;

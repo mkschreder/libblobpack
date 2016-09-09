@@ -61,7 +61,7 @@ struct blob {
 struct blob_policy {
 	const char *name; 
 	int type; 
-	struct blob_field *value; 
+	const struct blob_field *value; 
 }; 
 
 //! Initializes a blob structure. Optionally takes memory area to be copied into the buffer which must represent a valid blob buf. 
@@ -71,11 +71,15 @@ void blob_free(struct blob *buf);
 //! Resets header but does not deallocate any memory.  
 void blob_reset(struct blob *buf);
 //! Resizes the buffer. Can only be used to increase size.  
-bool blob_resize(struct blob *buf, int newsize);
+bool blob_resize(struct blob *buf, uint32_t newsize);
 
 //! Returns pointer to header attribute (the first element) which is also raw buffer
 static inline struct blob_field *blob_head(struct blob *self){
 	return (struct blob_field*)self->buf; 
+}
+
+static inline const struct blob_field *blob_head_const(const struct blob *self){
+	return (const struct blob_field*)self->buf; 
 }
 
 //! returns size of the whole buffer (including header element and padding)
@@ -135,7 +139,7 @@ struct blob_field *blob_put_int(struct blob *buf, long long val);
 struct blob_field *blob_put_real(struct blob *buf, double value); 
 
 //! write a raw attribute into the buffer
-struct blob_field *blob_put_attr(struct blob *buf, struct blob_field *attr); 
+struct blob_field *blob_put_attr(struct blob *buf, const struct blob_field *attr); 
 
 //! print out the whole buffer 
 void blob_dump(struct blob *self); 

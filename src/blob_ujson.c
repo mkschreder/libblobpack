@@ -48,16 +48,16 @@ http://www.opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
 
 #define DEBUG(...) {}
 
-void Object_objectAddKey(void *prv, JSOBJ obj, JSOBJ name, JSOBJ value){
+static void Object_objectAddKey(void *prv, JSOBJ obj, JSOBJ name, JSOBJ value){
 	DEBUG("new key %p %p %p\n", obj, name, value); 
 	//blob_put_string(prv, name); 
 }
 
-void Object_arrayAddItem(void *prv, JSOBJ obj, JSOBJ value){
+static void Object_arrayAddItem(void *prv, JSOBJ obj, JSOBJ value){
 	DEBUG("new array item \n"); 
 }
 
-JSOBJ Object_newString(void *prv, char *start, char *end){
+static JSOBJ Object_newString(void *prv, char *start, char *end){
 	size_t len = end - start + 1; 
 	char *str = malloc(len); 
 	memset(str, 0, len); 
@@ -68,47 +68,47 @@ JSOBJ Object_newString(void *prv, char *start, char *end){
 	return ret; 
 }
 
-JSOBJ Object_newTrue(void *prv){
+static JSOBJ Object_newTrue(void *prv){
 	DEBUG("new true\n"); 
 	return blob_put_int(prv, 1); 
 }
 
-JSOBJ Object_newFalse(void *prv){
+static JSOBJ Object_newFalse(void *prv){
 	DEBUG("new false\n"); 
 	return blob_put_int(prv, 0); 
 }
 
-JSOBJ Object_newNull(void *prv){
+static JSOBJ Object_newNull(void *prv){
 	DEBUG("new null\n"); 
 	return blob_put_int(prv, 0); 
 }
 
-JSOBJ Object_newObject(void *prv){	
+static JSOBJ Object_newObject(void *prv){	
 	DEBUG("new object\n"); 
 	return (JSOBJ)blob_open_table(prv);
 }
 
-JSOBJ Object_newArray(void *prv){
+static JSOBJ Object_newArray(void *prv){
 	DEBUG("new array\n"); 
 	return (JSOBJ)blob_open_array(prv); 
 }
 
-JSOBJ Object_newInteger(void *prv, JSINT32 value){
+static JSOBJ Object_newInteger(void *prv, JSINT32 value){
 	DEBUG("new int\n"); 
 	return blob_put_int(prv, value); 
 }
 
-JSOBJ Object_newLong(void *prv, JSINT64 value){
+static JSOBJ Object_newLong(void *prv, JSINT64 value){
 	DEBUG("new long\n"); 
 	return blob_put_int(prv, value); 
 }
 
-JSOBJ Object_newUnsignedLong(void *prv, JSUINT64 value){
+static JSOBJ Object_newUnsignedLong(void *prv, JSUINT64 value){
 	DEBUG("new ulong\n"); 
 	return blob_put_int(prv, value); 
 }
 
-JSOBJ Object_newDouble(void *prv, double value){
+static JSOBJ Object_newDouble(void *prv, double value){
 	DEBUG("new double\n"); 
 	return blob_put_real(prv, value); 
 }
@@ -177,7 +177,7 @@ bool blob_init_from_json(struct blob *self, const char *json){
 		return false; 
 	}
 	blob_init(self, 0, 0); 
-	struct blob_field *child; 
+	const struct blob_field *child; 
 	blob_field_for_each_child(blob_field_first_child(blob_head(&b)), child){
 		blob_put_attr(self, child); 
 	}

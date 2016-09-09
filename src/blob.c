@@ -24,12 +24,6 @@
 #define unpack754_32(i) (unpack754((i), 32, 8))
 #define unpack754_64(i) (unpack754((i), 64, 11))
 
-extern void blob_field_fill_pad(struct blob_field *attr);
-extern void blob_field_set_raw_len(struct blob_field *attr, unsigned int len);
-
-uint64_t pack754(long double f, unsigned bits, unsigned expbits); 
-long double unpack754(uint64_t i, unsigned bits, unsigned expbits); 
-
 static inline struct blob_field *blob_offset_to_attr(struct blob *buf, blob_offset_t offset){
 	void *ptr = (char *)buf->buf + (size_t)offset;
 	return ptr;
@@ -49,18 +43,18 @@ static void blob_field_init(struct blob_field *attr, uint32_t id, uint32_t len){
 }
 
 //! Attepts to reallocate the buffer to fit the new payload data
-bool blob_resize(struct blob *buf, int minlen){
+bool blob_resize(struct blob *buf, uint32_t minlen){
 	assert(minlen > 0 && minlen < BLOB_MAX_SIZE); 
 
 	char *new = 0;
-	int newsize = ((minlen / 256) + 1) * 256;
-	int cur_size = blob_size(buf); 
+	uint32_t newsize = ((minlen / 256) + 1) * 256;
+	uint32_t cur_size = blob_size(buf); 
 	// reallocate the memory of the buffer if we no longer have any memory left
 	if(newsize > buf->memlen){
 		new = realloc(buf->buf, newsize);
 		if (new) {
 			buf->buf = new;
-			memset(buf->buf + cur_size, 0, newsize - cur_size);
+			memset((char*)buf->buf + cur_size, 0, newsize - cur_size);
 			buf->memlen = newsize;  
 		} else { 
 			return false; 
@@ -122,7 +116,7 @@ static struct blob_field *blob_new_attr(struct blob *buf, int id, int payload){
 	
 	//DEBUG("adding attr at offset %d - ", cur_len); 
 
-	struct blob_field *attr = (struct blob_field*)(buf->buf + cur_len);
+	struct blob_field *attr = (struct blob_field*)((char*)buf->buf + cur_len);
 	
 	blob_field_init(attr, id, attr_raw_len);
 	blob_field_fill_pad(attr);
@@ -166,7 +160,7 @@ static struct blob_field *blob_put(struct blob *buf, int id, const void *ptr, un
 	}
 
 	if (ptr)
-		memcpy(blob_field_data(attr), ptr, len);
+		memcpy(attr->data, ptr, len);
 
 	return attr;
 }
@@ -176,21 +170,21 @@ struct blob_field *blob_put_string(struct blob *buf, const char *str){
 	return blob_put(buf, BLOB_FIELD_STRING, str, strlen(str) + 1);
 }
 
-struct blob_field *blob_put_u8(struct blob *buf, uint8_t val){
+static struct blob_field *blob_put_u8(struct blob *buf, uint8_t val){
 	return blob_put(buf, BLOB_FIELD_INT8, &val, sizeof(val));
 }
 
-struct blob_field *blob_put_u16(struct blob *buf, uint16_t val){
+static struct blob_field *blob_put_u16(struct blob *buf, uint16_t val){
 	val = cpu_to_be16(val);
 	return blob_put(buf, BLOB_FIELD_INT16, &val, sizeof(val));
 }
 
-struct blob_field *blob_put_u32(struct blob *buf, uint32_t val){
+static struct blob_field *blob_put_u32(struct blob *buf, uint32_t val){
 	val = cpu_to_be32(val);
 	return blob_put(buf, BLOB_FIELD_INT32, &val, sizeof(val));
 }
 
-struct blob_field *blob_put_u64(struct blob *buf, uint64_t val){
+static struct blob_field *blob_put_u64(struct blob *buf, uint64_t val){
 	val = cpu_to_be64(val);
 	return blob_put(buf, BLOB_FIELD_INT64, &val, sizeof(val));
 }
@@ -215,7 +209,7 @@ blob_offset_t blob_open_array(struct blob *buf){
 void blob_close_array(struct blob *buf, blob_offset_t offset){
 	if((long)offset > (long)blob_size(buf)) return; 
 	struct blob_field *attr = blob_offset_to_attr(buf, offset);
-	int len = (buf->buf + blob_field_raw_len(blob_head(buf))) - (void*)attr; 
+	int len = ((char*)buf->buf + blob_field_raw_len(blob_head(buf))) - (char*)attr; 
 	blob_field_set_raw_len(attr, len);
 }
 
@@ -227,16 +221,16 @@ blob_offset_t blob_open_table(struct blob *buf){
 void blob_close_table(struct blob *buf, blob_offset_t offset){
 	if((long)offset > (long)blob_size(buf)) return; 
 	struct blob_field *attr = blob_offset_to_attr(buf, offset);
-	int len = (buf->buf + blob_field_raw_len(blob_head(buf))) - (void*)attr; 
+	int len = ((char*)buf->buf + blob_field_raw_len(blob_head(buf))) - (char*)attr; 
 	blob_field_set_raw_len(attr, len);
 }
 
-struct blob_field *blob_put_float(struct blob *buf, double value){
+static struct blob_field *blob_put_float(struct blob *buf, double value){
 	uint32_t val = cpu_to_be32(pack754_32((float)value));  
 	return blob_put(buf, BLOB_FIELD_FLOAT32, &val, sizeof(val)); 
 }
  
-struct blob_field *blob_put_double(struct blob *buf, double value){
+static struct blob_field *blob_put_double(struct blob *buf, double value){
 	uint64_t val = cpu_to_be64(pack754_64(value));  
 	return blob_put(buf, BLOB_FIELD_FLOAT64, &val, sizeof(val));
 } 
@@ -246,7 +240,7 @@ struct blob_field *blob_put_real(struct blob *buf, double value){
 	return blob_put_double(buf, value); 
 }
 
-struct blob_field *blob_put_attr(struct blob *buf, struct blob_field *attr){
+struct blob_field *blob_put_attr(struct blob *buf, const struct blob_field *attr){
 	if(!attr) return NULL; 
 	
 	size_t s =  blob_field_data_len(attr); 
@@ -255,7 +249,7 @@ struct blob_field *blob_put_attr(struct blob *buf, struct blob_field *attr){
 	return f; 
 }
 
-static void __attribute__((unused)) _blob_field_dump(struct blob_field *node, int indent){
+static void __attribute__((unused)) _blob_field_dump(const struct blob_field *node, uint32_t indent){
 	static const char *names[] = {
 		[BLOB_FIELD_INVALID] = "BLOB_FIELD_INVALID",
 		[BLOB_FIELD_BINARY] = "BLOB_FIELD_BINARY",
@@ -270,19 +264,19 @@ static void __attribute__((unused)) _blob_field_dump(struct blob_field *node, in
 		[BLOB_FIELD_TABLE] = "BLOB_FIELD_TABLE"
 	}; 
 
-	for(struct blob_field *attr = blob_field_first_child(node); attr; attr = blob_field_next_child(node, attr)){
-		char *data = (char*)attr; //blob_field_data(attr); 
+	for(const struct blob_field *attr = blob_field_first_child(node); attr; attr = blob_field_next_child(node, attr)){
+		const unsigned char *data = (const unsigned char*)attr; //blob_field_data(attr); 
 
-		int id = blob_field_type(attr);
-		int len = blob_field_raw_pad_len(attr);
+		uint32_t id = blob_field_type(attr);
+		uint32_t len = blob_field_raw_pad_len(attr);
 
-		int offset = (node)?((int)((char*)attr - (char*)node)):0; 
-		for(int c = 0; c < indent; c++) printf("\t"); 
+		uint32_t offset = (node)?((uint32_t)((const char*)attr - (const char*)node)):0; 
+		for(uint32_t c = 0; c < indent; c++) printf("\t"); 
 		printf("[ field ("); 
-		for(int c = 0; c < sizeof(struct blob_field); c++){
-			printf("%02x", (int)*((char*)attr + c) & 0xff); 
+		for(uint32_t c = 0; c < sizeof(struct blob_field); c++){
+			printf("%02x", (int)*((const char*)attr + c) & 0xff); 
 		}
-		printf(") type=%s offset=%d full padded len: %d, header+data: %d, data len: %d ]\n", names[(id < BLOB_FIELD_LAST)?id:0], offset, len, blob_field_raw_len(attr), blob_field_data_len(attr)); 
+		printf(") type=%s offset=%d full padded len: %d, header+data: %d, data len: %d ]\n", names[(id < BLOB_FIELD_LAST)?id:0], (int)offset, (int)len, (int)blob_field_raw_len(attr), blob_field_data_len(attr)); 
 
 		if(id == BLOB_FIELD_ARRAY || id == BLOB_FIELD_TABLE) {
 			_blob_field_dump(attr, indent+1); 
@@ -290,7 +284,7 @@ static void __attribute__((unused)) _blob_field_dump(struct blob_field *node, in
 		}
 
 		printf("\t"); 
-		for(int c = 0; c < blob_field_raw_pad_len(attr); c++){
+		for(uint32_t c = 0; c < blob_field_raw_pad_len(attr); c++){
 			if(c > 0 && c % 10 == 0)
 				printf("\n\t"); 
 			printf(" %02x(%c)", data[c] & 0xff, (data[c] > 0x10 && data[c] < 128)?data[c]:'.'); 
@@ -299,7 +293,7 @@ static void __attribute__((unused)) _blob_field_dump(struct blob_field *node, in
 	}
 }
 
-void blob_field_dump(struct blob_field *self){
+void blob_field_dump(const struct blob_field *self){
 	_blob_field_dump(self, 0); 
 }
 

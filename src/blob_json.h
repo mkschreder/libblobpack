@@ -29,13 +29,13 @@ char *blob_format_json(struct blob_field *attr, bool list);
 char *blob_format_json_indent(struct blob_field *attr, bool list, int indent); 
 */
 
-void blob_field_dump_json(struct blob_field *self); 
-void blob_field_dump_json_pretty(struct blob_field *self); 
+void blob_field_dump_json(const struct blob_field *self); 
+void blob_field_dump_json_pretty(const struct blob_field *self); 
 
-static inline void blob_dump_json(struct blob *self){ blob_field_dump_json(blob_head(self)); }
+static inline void blob_dump_json(const struct blob *self){ blob_field_dump_json(blob_head_const(self)); }
 
-char *blob_field_to_json(struct blob_field *self); 
-static inline char *blob_to_json(struct blob *self){ return blob_field_to_json(blob_head(self)); }
+char *blob_field_to_json(const struct blob_field *self); 
+static inline char *blob_to_json(const struct blob *self){ return blob_field_to_json(blob_head_const(self)); }
 
 bool blob_init_from_json(struct blob *self, const char *json); 
 

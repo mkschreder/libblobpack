@@ -17,18 +17,19 @@ struct blob_field {
 
 struct blob_field_policy {
 	const char *name;
-	int type;
+	uint8_t type;
 };
 
 //! returns the data of the attribute
-void *blob_field_data(const struct blob_field *attr); 
+const void *blob_field_data(const struct blob_field *attr); 
 
 //! returns the type of the attribute 
-unsigned int blob_field_type(const struct blob_field *attr); 
+uint8_t blob_field_type(const struct blob_field *attr); 
 void blob_field_set_type(struct blob_field *self, int type); 
 
 //! returns full length of attribute
 unsigned int blob_field_raw_len(const struct blob_field *attr); 
+void blob_field_set_raw_len(struct blob_field *attr, uint32_t raw_len); 
 
 //! includes length of data of the attribute
 unsigned int blob_field_data_len(const struct blob_field *attr); 
@@ -64,23 +65,23 @@ float blob_field_get_float(const struct blob_field *attr);
 double blob_field_get_double(const struct blob_field *attr); 
 */
 
-//extern void blob_field_fill_pad(struct blob_field *attr);
+void blob_field_fill_pad(struct blob_field *attr);
 //extern void blob_field_set_raw_len(struct blob_field *attr, unsigned int len);
 bool blob_field_equal(const struct blob_field *a1, const struct blob_field *a2);
 struct blob_field *blob_field_copy(struct blob_field *attr);
 //bool blob_field_check_type(const void *ptr, unsigned int len, int type);
 
-struct blob_field *blob_field_first_child(const struct blob_field *self); 
-struct blob_field *blob_field_next_child(const struct blob_field *self, const struct blob_field *child); 
+const struct blob_field *blob_field_first_child(const struct blob_field *self); 
+const struct blob_field *blob_field_next_child(const struct blob_field *self, const struct blob_field *child); 
 
-void blob_field_dump(struct blob_field *self); 
+void blob_field_dump(const struct blob_field *self); 
 
-bool blob_field_validate(struct blob_field *attr, const char *signature); 
+bool blob_field_validate(const struct blob_field *attr, const char *signature); 
 
-bool blob_field_parse(struct blob_field *attr, const char *signature, struct blob_field **out, int out_size); 
+bool blob_field_parse(const struct blob_field *attr, const char *signature, const struct blob_field **out, int out_size); 
 
 struct blob_policy; 
-bool blob_field_parse_values(struct blob_field *attr, struct blob_policy *policy, int policy_size); 
+bool blob_field_parse_values(const struct blob_field *attr, struct blob_policy *policy, int policy_size); 
 
 #define blob_field_for_each_kv(attr, key, value) \
 	for(key = blob_field_first_child(attr), value = blob_field_next_child(attr, key); \

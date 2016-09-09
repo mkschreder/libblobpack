@@ -54,8 +54,8 @@ http://www.opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
 
 struct DecoderState
 {
-	char *start;
-	char *end;
+	const char *start;
+	const char *end;
 	char *escStart;
 	char *escEnd;
 	int escHeap;
@@ -71,17 +71,17 @@ typedef JSOBJ (*PFN_DECODER)( struct DecoderState *ds);
 static JSOBJ SetError( struct DecoderState *ds, int offset, const char *message)
 {
 	ds->dec->errorOffset = ds->start + offset;
-	ds->dec->errorStr = (char *) message;
+	ds->dec->errorStr = (const char *) message;
 	return NULL;
 }
 
-double createDouble(double intNeg, double intValue, double frcValue, int frcDecimalCount)
+static double createDouble(double intNeg, double intValue, double frcValue, int frcDecimalCount)
 {
 	static const double g_pow10[] = {1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001,0.0000001, 0.00000001, 0.000000001, 0.0000000001, 0.00000000001, 0.000000000001, 0.0000000000001, 0.00000000000001, 0.000000000000001};
 	return (intValue + (frcValue * g_pow10[frcDecimalCount])) * intNeg;
 }
 
-JSOBJ decodePreciseFloat(struct DecoderState *ds)
+static JSOBJ decodePreciseFloat(struct DecoderState *ds)
 {
 	char *end;
 	double value;
@@ -98,7 +98,7 @@ JSOBJ decodePreciseFloat(struct DecoderState *ds)
 	return ds->dec->newDouble(ds->prv, value);
 }
 
-JSOBJ decode_numeric (struct DecoderState *ds)
+static JSOBJ decode_numeric (struct DecoderState *ds)
 {
 	int intNeg = 1;
 	int mantSize = 0;
@@ -109,7 +109,7 @@ JSOBJ decode_numeric (struct DecoderState *ds)
 	double frcValue = 0.0;
 	double expNeg;
 	double expValue;
-	char *offset = ds->start;
+	const char *offset = ds->start;
 
 	JSUINT64 overflowLimit = LLONG_MAX;
 
@@ -308,9 +308,9 @@ BREAK_EXP_LOOP:
 	return ds->dec->newDouble (ds->prv, createDouble( (double) intNeg, (double) intValue , frcValue, decimalCount) * pow(10.0, expValue * expNeg));
 }
 
-JSOBJ decode_true ( struct DecoderState *ds)
+static JSOBJ decode_true ( struct DecoderState *ds)
 {
-	char *offset = ds->start;
+	const char *offset = ds->start;
 	offset ++;
 
 	if (*(offset++) != 'r')
@@ -328,9 +328,9 @@ SETERROR:
 	return SetError(ds, -1, "Unexpected character found when decoding 'true'");
 }
 
-JSOBJ decode_false ( struct DecoderState *ds)
+static JSOBJ decode_false ( struct DecoderState *ds)
 {
-	char *offset = ds->start;
+	const char *offset = ds->start;
 	offset ++;
 
 	if (*(offset++) != 'a')
@@ -350,9 +350,9 @@ SETERROR:
 	return SetError(ds, -1, "Unexpected character found when decoding 'false'");
 }
 
-JSOBJ decode_null ( struct DecoderState *ds)
+static JSOBJ decode_null ( struct DecoderState *ds)
 {
-	char *offset = ds->start;
+	const char *offset = ds->start;
 	offset ++;
 
 	if (*(offset++) != 'u')
@@ -370,9 +370,9 @@ SETERROR:
 	return SetError(ds, -1, "Unexpected character found when decoding 'null'");
 }
 
-void SkipWhitespace(struct DecoderState *ds)
+static void SkipWhitespace(struct DecoderState *ds)
 {
-	char *offset = ds->start;
+	const char *offset = ds->start;
 
 	for (;;)
 	{
@@ -421,7 +421,7 @@ static const JSUINT8 g_decoderLookup[256] =
 	/* 0xf0 */ 4, 4, 4, 4, 4, 4, 4, 4, DS_UTFLENERROR, DS_UTFLENERROR, DS_UTFLENERROR, DS_UTFLENERROR, DS_UTFLENERROR, DS_UTFLENERROR, DS_UTFLENERROR, DS_UTFLENERROR,
 };
 
-JSOBJ decode_string ( struct DecoderState *ds)
+static JSOBJ decode_string ( struct DecoderState *ds)
 {
 	JSUTF16 sur[2] = { 0 };
 	int iSur = 0;
@@ -429,9 +429,9 @@ JSOBJ decode_string ( struct DecoderState *ds)
 	char *escOffset;
 	char *escStart;
 	size_t escLen = (ds->escEnd - ds->escStart);
-	JSUINT8 *inputOffset;
+	const JSUINT8 *inputOffset;
 	JSUINT8 oct;
-	JSUTF32 ucs;
+	//JSUTF32 ucs;
 	ds->lastType = JT_INVALID;
 	ds->start ++;
 
@@ -473,7 +473,7 @@ JSOBJ decode_string ( struct DecoderState *ds)
 	}
 
 	escOffset = ds->escStart;
-	inputOffset = (JSUINT8 *) ds->start;
+	inputOffset = (const JSUINT8 *) ds->start;
 
 	for (;;)
 	{
@@ -487,7 +487,7 @@ JSOBJ decode_string ( struct DecoderState *ds)
 			{
 				ds->lastType = JT_UTF8;
 				inputOffset ++;
-				ds->start += ( (char *) inputOffset - (ds->start));
+				ds->start += ( (const char *) inputOffset - (ds->start));
 				return ds->dec->newString(ds->prv, ds->escStart, escOffset);
 			}
 			case DS_UTFLENERROR:
@@ -509,10 +509,9 @@ JSOBJ decode_string ( struct DecoderState *ds)
 
 					case 'u':
 					{
-						int index;
 						inputOffset ++;
 
-						for (index = 0; index < 4; index ++)
+						for (int i = 0; i < 4; i ++)
 						{
 							switch (*inputOffset)
 							{
@@ -596,7 +595,7 @@ JSOBJ decode_string ( struct DecoderState *ds)
 
 			case 2:
 			{
-				ucs = (*inputOffset++) & 0x1f;
+				JSUTF32 ucs = (*inputOffset++) & 0x1f;
 				ucs <<= 6;
 				if (((*inputOffset) & 0x80) != 0x80)
 				{
@@ -613,7 +612,7 @@ JSOBJ decode_string ( struct DecoderState *ds)
 				JSUTF32 ucs = 0;
 				ucs |= (*inputOffset++) & 0x0f;
 
-				for (index = 0; index < 2; index ++)
+				for (int i = 0; i < 2; i ++)
 				{
 					ucs <<= 6;
 					oct = (*inputOffset++);
@@ -671,7 +670,7 @@ JSOBJ decode_string ( struct DecoderState *ds)
 	}
 }
 
-JSOBJ decode_array(struct DecoderState *ds)
+static JSOBJ decode_array(struct DecoderState *ds)
 {
 	JSOBJ itemValue;
 	JSOBJ newObj;
@@ -734,7 +733,7 @@ JSOBJ decode_array(struct DecoderState *ds)
 	}
 }
 
-JSOBJ decode_object( struct DecoderState *ds)
+static JSOBJ decode_object( struct DecoderState *ds)
 {
 	JSOBJ itemName;
 	JSOBJ itemValue;
@@ -868,7 +867,7 @@ JSOBJ JSON_DecodeObject(JSONObjectDecoder *dec, const char *buffer, size_t cbBuf
 	char escBuffer[(JSON_MAX_STACK_BUFFER_SIZE / sizeof(char))];
 	JSOBJ ret;
 
-	ds.start = (char *) buffer;
+	ds.start = (const char *) buffer;
 	ds.end = ds.start + cbBuffer;
 
 	ds.escStart = escBuffer;

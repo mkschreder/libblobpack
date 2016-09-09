@@ -19,7 +19,7 @@
 
 //#include <json-c/json.h>
 
-typedef const char *(*blob_json_format_t)(void *priv, struct blob_field *attr);
+typedef const char *(*blob_json_format_t)(void *priv, const struct blob_field *attr);
 /*
 bool blob_put_json_object(struct blob *b, json_object *obj)
 {
@@ -152,9 +152,9 @@ static void blob_format_string(struct strbuf *s, const char *str)
 	const unsigned char *p, *last, *end;
 	char buf[8] = "\\u00";
 
-	end = (unsigned char *) str + strlen(str);
+	end = (const unsigned char *) str + strlen(str);
 	blob_puts(s, "\"", 1);
-	for (p = (unsigned char *) str, last = p; *p; p++) {
+	for (p = (const unsigned char *) str, last = p; *p; p++) {
 		char escape = '\0';
 		int len;
 
@@ -186,7 +186,7 @@ static void blob_format_string(struct strbuf *s, const char *str)
 			continue;
 
 		if (p > last)
-			blob_puts(s, (char *) last, p - last);
+			blob_puts(s, (const char *) last, p - last);
 		last = p + 1;
 		buf[1] = escape;
 
@@ -199,17 +199,17 @@ static void blob_format_string(struct strbuf *s, const char *str)
 		blob_puts(s, buf, len);
 	}
 
-	blob_puts(s, (char *) last, end - last);
+	blob_puts(s, (const char *) last, end - last);
 	blob_puts(s, "\"", 1);
 }
 
-static void blob_format_json_list(struct strbuf *s, struct blob_field *attr, bool array);
+static void blob_format_json_list(struct strbuf *s, const struct blob_field *attr, bool array);
 
-static void blob_format_element(struct strbuf *s, struct blob_field *attr, bool array, bool head)
+static void blob_format_element(struct strbuf *s, const struct blob_field *attr, bool array, bool head)
 {
 	const char *data_str;
 	char buf[32];
-	void *data;
+	const void *data;
 
 	//if (!blob_check_attr(attr, false))
 	//		return;
@@ -233,22 +233,22 @@ static void blob_format_element(struct strbuf *s, struct blob_field *attr, bool 
 	//	sprintf(buf, "%s", *(uint8_t *)data ? "true" : "false");
 //		break;
 	case BLOB_FIELD_INT8: 
-		sprintf(buf, "%d", *(uint8_t*)data); 
+		sprintf(buf, "%d", *(const uint8_t*)data); 
 		break; 
 	case BLOB_FIELD_INT16:
-		sprintf(buf, "%d", be16_to_cpu(*(uint16_t *)data));
+		sprintf(buf, "%d", be16_to_cpu(*(const uint16_t *)data));
 		break;
 	case BLOB_FIELD_INT32:
-		sprintf(buf, "%d", (int) be32_to_cpu(*(uint32_t *)data));
+		sprintf(buf, "%d", (int) be32_to_cpu(*(const uint32_t *)data));
 		break;
 	case BLOB_FIELD_INT64:
-		sprintf(buf, "%lld", (long long int) be64_to_cpu(*(uint64_t *)data));
+		sprintf(buf, "%lld", (long long int) be64_to_cpu(*(const uint64_t *)data));
 		break;
 	case BLOB_FIELD_FLOAT32: 
-		sprintf(buf, "%f", (double) unpack754_32(be32_to_cpu(*(uint32_t*)data))); 
+		sprintf(buf, "%f", (double) unpack754_32(be32_to_cpu(*(const uint32_t*)data))); 
 		break; 
 	case BLOB_FIELD_FLOAT64: 
-		sprintf(buf, "%Le", unpack754_64(be64_to_cpu(*(uint64_t*)data))); 
+		sprintf(buf, "%Le", unpack754_64(be64_to_cpu(*(const uint64_t*)data))); 
 		break; 
 	case BLOB_FIELD_STRING:
 		blob_format_string(s, blob_field_data(attr));
@@ -265,8 +265,8 @@ out:
 	blob_puts(s, data_str, strlen(data_str));
 }
 
-static void blob_format_json_list(struct strbuf *s, struct blob_field *attr, bool array){
-	struct blob_field *pos;
+static void blob_format_json_list(struct strbuf *s, const struct blob_field *attr, bool array){
+	const struct blob_field *pos;
 	bool first = true;
 
 	blob_puts(s, (array ? "[" : "{" ), 1);
@@ -293,7 +293,7 @@ static void blob_format_json_list(struct strbuf *s, struct blob_field *attr, boo
 	blob_puts(s, (array ? "]" : "}"), 1);
 }
 
-char *blob_format_json_with_cb(struct blob_field *attr, bool list, blob_json_format_t cb, void *priv, int indent)
+static char *blob_format_json_with_cb(const struct blob_field *attr, bool list, blob_json_format_t cb, void *priv, int indent)
 {
 	struct strbuf s;
 	bool array;
@@ -328,15 +328,15 @@ char *blob_format_json_with_cb(struct blob_field *attr, bool list, blob_json_for
 	return s.buf;
 }
 
-char *blob_field_to_json(struct blob_field *attr){
+char *blob_field_to_json(const struct blob_field *attr){
 	return blob_format_json_with_cb(attr, false, NULL, NULL, -1);
 }
 
-char *blob_field_to_json_pretty(struct blob_field *attr){
+static char *blob_field_to_json_pretty(const struct blob_field *attr){
 	return blob_format_json_with_cb(attr, false, NULL, NULL, 1);
 }
 
-static void _blob_field_dump_json(struct blob_field *self, int indent){
+static void _blob_field_dump_json(const struct blob_field *self, int indent){
 	assert(self); 
 	char *json = NULL; 
 	if(indent == 0)
@@ -347,12 +347,12 @@ static void _blob_field_dump_json(struct blob_field *self, int indent){
 	free(json); 
 }
 
-void blob_field_dump_json(struct blob_field *self){
+void blob_field_dump_json(const struct blob_field *self){
 	assert(self); 
 	_blob_field_dump_json(self, 0); 
 }
 
-void blob_field_dump_json_pretty(struct blob_field *self){
+void blob_field_dump_json_pretty(const struct blob_field *self){
 	assert(self); 
 	_blob_field_dump_json(self, 1); 
 }

@@ -4,7 +4,7 @@
 #include <math.h>
 #include <memory.h>
 
-int main(){
+int main(void){
 	struct blob blob; 
 	blob_init(&blob, 0, 0); 
 
@@ -33,7 +33,7 @@ int main(){
 	blob_put_int(&blob, 5000000000lu); 
 	blob_close_array(&blob, o); 
 
-	struct blob_field *out[8]; 
+	const struct blob_field *out[8]; 
 	TEST(blob_field_parse(blob_head(&blob), "isifssta", out, 8)); 
 
 	char *json = blob_to_json(&blob); 

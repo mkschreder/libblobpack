@@ -200,12 +200,13 @@ bool blob_put_json_from_file(struct blob *self, const char *file){
 	lseek(fd, SEEK_SET, 0); 	
 	char *buffer = malloc(file_size + 1); // allocate on stack
 	memset(buffer, 0, file_size + 1); 
-	if(file_size != read(fd, buffer, file_size)){
+	int ret = 0; 
+	if((ret = read(fd, buffer, file_size)) > 0 && (size_t)ret != file_size){
 		close(fd); 
 		return false; 
 	}
 	close(fd); 
-	int ret = blob_put_json(self, buffer); 
+	ret = blob_put_json(self, buffer); 
 	free(buffer); 
 	return ret; 
 }

@@ -4,7 +4,7 @@
 #include <math.h>
 #include <memory.h>
 
-int main(){
+int main(void){
 	struct blob blob; 
 	blob_init(&blob, 0, 0); 
 
@@ -13,7 +13,7 @@ int main(){
 	blob_put_int(&blob, -13); 
 	blob_put_real(&blob, M_PI); 
 
-	struct blob_field *out[4]; 
+	const struct blob_field *out[4]; 
 
 	blob_dump_json(&blob); 
 

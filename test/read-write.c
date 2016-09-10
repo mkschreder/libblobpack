@@ -4,7 +4,7 @@
 #include <math.h>
 #include <memory.h>
 
-int main(){
+int main(void){
 	struct blob blob; 
 	blob_init(&blob, 0, 0); 
 	char data_in[] = {1, 2, 3, 4, 5, 6, 7}; 
@@ -50,8 +50,8 @@ int main(){
 
 	blob_dump(&blob); 
 
-	struct blob_field *root = blob_head(&blob); 
-	struct blob_field *child = blob_field_first_child(root); 
+	const struct blob_field *root = blob_head(&blob); 
+	const struct blob_field *child = blob_field_first_child(root); 
 
 	TEST(blob_field_get_bool(child) == true); 
 	TEST(strcmp(blob_field_get_string(child = blob_field_next_child(root, child)), "foo") == 0); 
@@ -76,7 +76,7 @@ int main(){
 
 	// iterate over the list 
 	child = blob_field_next_child(root, child); 
-	struct blob_field *list = child; 
+	const struct blob_field *list = child; 
 	child = blob_field_first_child(child); 
 
 	TEST(strcmp(blob_field_get_string(child), "one") == 0); 

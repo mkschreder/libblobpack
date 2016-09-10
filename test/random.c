@@ -1,4 +1,7 @@
 #include "blobpack.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 
 enum {
 	FIELD_STRING, 

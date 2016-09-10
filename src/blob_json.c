@@ -129,7 +129,7 @@ static bool blob_puts(struct strbuf *s, const char *c, int len)
 
 static void add_separator(struct strbuf *s)
 {
-	static char indent_chars[17] = "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+	char indent_chars[17] = "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
 	int indent;
 	char *start;
 
@@ -348,12 +348,12 @@ static void _blob_field_dump_json(const struct blob_field *self, int indent){
 }
 
 void blob_field_dump_json(const struct blob_field *self){
-	assert(self); 
+	if(!self) return; 
 	_blob_field_dump_json(self, 0); 
 }
 
 void blob_field_dump_json_pretty(const struct blob_field *self){
-	assert(self); 
+	if(!self) return; 
 	_blob_field_dump_json(self, 1); 
 }
 

@@ -104,7 +104,7 @@ void blob_field_set_u8(const struct blob_field *attr, uint8_t val){
 */
 static uint16_t blob_field_get_u16(const struct blob_field *attr){
 	assert(attr);
-	const uint16_t *tmp = (const uint16_t*)attr->data;
+	const uint16_t *tmp = (const uint16_t*)(const void*)attr->data;
 	return be16_to_cpu(*tmp);
 }
 /*
@@ -117,7 +117,7 @@ blob_field_set_u16(const struct blob_field *attr, uint16_t val){
 */
 static uint32_t blob_field_get_u32(const struct blob_field *attr){
 	assert(attr); 
-	const uint32_t *tmp = (const uint32_t*)attr->data;
+	const uint32_t *tmp = (const uint32_t*)(const void*)attr->data;
 	return be32_to_cpu(*tmp);
 }
 /*

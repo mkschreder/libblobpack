@@ -425,7 +425,6 @@ static JSOBJ decode_string ( struct DecoderState *ds)
 {
 	JSUTF16 sur[2] = { 0 };
 	int iSur = 0;
-	int index;
 	char *escOffset;
 	char *escStart;
 	size_t escLen = (ds->escEnd - ds->escStart);
@@ -635,7 +634,7 @@ static JSOBJ decode_string ( struct DecoderState *ds)
 				JSUTF32 ucs = 0;
 				ucs |= (*inputOffset++) & 0x07;
 
-				for (index = 0; index < 3; index ++)
+				for (int index = 0; index < 3; index ++)
 				{
 					ucs <<= 6;
 					oct = (*inputOffset++);

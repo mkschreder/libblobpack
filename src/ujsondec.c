@@ -634,7 +634,7 @@ static JSOBJ decode_string ( struct DecoderState *ds)
 				JSUTF32 ucs = 0;
 				ucs |= (*inputOffset++) & 0x07;
 
-				for (int index = 0; index < 3; index ++)
+				for (int i = 0; i < 3; i ++)
 				{
 					ucs <<= 6;
 					oct = (*inputOffset++);

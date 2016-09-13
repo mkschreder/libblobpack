@@ -33,11 +33,12 @@ int main(void){
 	blob_put_int(&blob, 5000000000lu); 
 	blob_close_array(&blob, o); 
 
+	char *json = blob_to_json(&blob); 
+	printf("json: %s\n", json); 
+
 	const struct blob_field *out[8]; 
 	TEST(blob_field_parse(blob_head(&blob), "isifssta", out, 8)); 
 
-	char *json = blob_to_json(&blob); 
-	
 	TEST(strcmp("[1,\"foo\",243,3.141593e+00,\"copyme\",\"copyme\",{\"one\":1,\"two\":2,\"three\":3},[100,200,1000,70000,5000000000]]", json) == 0); 
 
 	struct blob b2; 
@@ -49,6 +50,8 @@ int main(void){
 
 	free(json); 
 	free(json2); 
+
+	blob_free(&blob); 
 
 	return 0; 
 }

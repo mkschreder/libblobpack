@@ -269,11 +269,21 @@ static void blob_format_json_list(struct strbuf *s, const struct blob_field *att
 	const struct blob_field *pos;
 	bool first = true;
 
+	// just validate first that we really have a table and if not then we just output it as an array. 
+	for(pos = blob_field_first_child(attr); pos; pos = blob_field_next_child(attr, pos)){
+		if(!array && blob_field_type(pos) != BLOB_FIELD_STRING){
+			array = true; 
+			break; 
+		}
+		// for kv we need to pop the value here as well
+		if(!array)
+			pos = blob_field_next_child(attr, pos); 
+	}
+
 	blob_puts(s, (array ? "[" : "{" ), 1);
 	s->indent_level++;
 	add_separator(s);
 
-	//__blob_for_each_attr(pos, attr, rem) {
 	for(pos = blob_field_first_child(attr); pos; pos = blob_field_next_child(attr, pos)){
 		if (!first) {
 			blob_puts(s, ",", 1);
@@ -282,12 +292,13 @@ static void blob_format_json_list(struct strbuf *s, const struct blob_field *att
 		
 		if(!array){
 			blob_format_string(s, blob_field_data(pos)); 
-			blob_puts(s, ": ", s->indent ? 2 : 1);
+			blob_puts(s, ":", s->indent ? 2 : 1);
 			pos = blob_field_next_child(attr, pos); 
 		}
 		blob_format_element(s, pos, array, false);
 		first = false;
 	}
+
 	s->indent_level--;
 	add_separator(s);
 	blob_puts(s, (array ? "]" : "}"), 1);

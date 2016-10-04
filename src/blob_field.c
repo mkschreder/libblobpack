@@ -1,6 +1,23 @@
+/*
+	Copyright (C) 2010 Felix Fietkau <nbd@openwrt.org>
+ 	Copyright (C) 2015 Martin Schröder <mkschreder.uk@gmail.com>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "blob.h"
 #include "blob_field.h"
-
 
 static const int blob_type_minlen[BLOB_FIELD_LAST] = {
 	[BLOB_FIELD_STRING] = 1,
@@ -29,8 +46,8 @@ void blob_field_set_raw_len(struct blob_field *attr, uint32_t len){
 	if(!attr) return; 
 	if(len < sizeof(struct blob_field)) len = sizeof(struct blob_field);
 	len &= BLOB_FIELD_LEN_MASK;
-	attr->id_len &= ~cpu_to_be32(BLOB_FIELD_LEN_MASK);
-	attr->id_len |= cpu_to_be32(len);
+	attr->id_len &= ~htobe32(BLOB_FIELD_LEN_MASK);
+	attr->id_len |= htobe32(len);
 }
 /*
 bool blob_field_check_type(const void *ptr, unsigned int len, int type){
@@ -105,34 +122,34 @@ void blob_field_set_u8(const struct blob_field *attr, uint8_t val){
 static uint16_t blob_field_get_u16(const struct blob_field *attr){
 	assert(attr);
 	const uint16_t *tmp = (const uint16_t*)(const void*)attr->data;
-	return be16_to_cpu(*tmp);
+	return be16toh(*tmp);
 }
 /*
 void
 blob_field_set_u16(const struct blob_field *attr, uint16_t val){
 	if(!attr) return; 
 	uint16_t *tmp = (uint16_t*)attr->data;
-	*tmp = cpu_to_be16(val); 
+	*tmp = htobe16(val); 
 }
 */
 static uint32_t blob_field_get_u32(const struct blob_field *attr){
 	assert(attr); 
 	const uint32_t *tmp = (const uint32_t*)(const void*)attr->data;
-	return be32_to_cpu(*tmp);
+	return be32toh(*tmp);
 }
 /*
 void
 blob_field_set_u32(const struct blob_field *attr, uint32_t val){
 	if(!attr) return; 
 	uint32_t *tmp = (uint32_t*)attr->data;
-	*tmp = cpu_to_be32(val); 
+	*tmp = htobe32(val); 
 }
 */
 static uint64_t blob_field_get_u64(const struct blob_field *attr){
 	assert(attr); 
 	const uint32_t *ptr = (const uint32_t *) blob_field_data(attr);
-	uint64_t tmp = ((uint64_t) be32_to_cpu(ptr[0])) << 32;
-	tmp |= be32_to_cpu(ptr[1]);
+	uint64_t tmp = ((uint64_t) be32toh(ptr[0])) << 32;
+	tmp |= be32toh(ptr[1]);
 	return tmp;
 }
 
@@ -247,22 +264,22 @@ size_t blob_field_get_raw(const struct blob_field *attr, uint8_t *data, size_t d
 //! returns the type of the attribute 
 uint8_t blob_field_type(const struct blob_field *attr){
 	if(!attr) return BLOB_FIELD_INVALID; 
-	int id = (be32_to_cpu(attr->id_len) & BLOB_FIELD_ID_MASK) >> BLOB_FIELD_ID_SHIFT;
+	int id = (be32toh(attr->id_len) & BLOB_FIELD_ID_MASK) >> BLOB_FIELD_ID_SHIFT;
 	return id;
 }
 /*
 void blob_field_set_type(struct blob_field *self, int type){
 	assert(self); 
-	int id_len = be32_to_cpu(self->id_len); 
+	int id_len = be32toh(self->id_len); 
 	id_len = (id_len & ~BLOB_FIELD_ID_MASK) | (type << BLOB_FIELD_ID_SHIFT); 	
-	self->id_len = cpu_to_be32(id_len);
+	self->id_len = htobe32(id_len);
 }
 */
 //! returns full length of attribute
 unsigned int
 blob_field_raw_len(const struct blob_field *attr){
 	assert(attr); 
-	return (be32_to_cpu(attr->id_len) & BLOB_FIELD_LEN_MASK); 
+	return (be32toh(attr->id_len) & BLOB_FIELD_LEN_MASK); 
 }
 
 //! includes length of data of the attribute

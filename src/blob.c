@@ -1,23 +1,23 @@
 /*
- * blob - library for generating/parsing tagged binary data
- *
- * Copyright (C) 2010 Felix Fietkau <nbd@openwrt.org>
- * Copyright (C) 2015 Martin Schröder <mkschreder.uk@gmail.com>
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
+	Copyright (C) 2010 Felix Fietkau <nbd@openwrt.org>
+ 	Copyright (C) 2015 Martin Schröder <mkschreder.uk@gmail.com>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "blob.h"
+#include "ieee754.h"
 
 #define pack754_32(f) (pack754((f), 32, 8))
 #define pack754_64(f) (pack754((f), 64, 11))
@@ -39,7 +39,7 @@ static void blob_field_init(struct blob_field *attr, uint32_t id, uint32_t len){
 	//len += sizeof(struct blob_field); 
 	len &= BLOB_FIELD_LEN_MASK;
 	len |= (id << BLOB_FIELD_ID_SHIFT) & BLOB_FIELD_ID_MASK;
-	attr->id_len = cpu_to_be32(len);
+	attr->id_len = htobe32(len);
 }
 
 //! Attepts to reallocate the buffer to fit the new payload data
@@ -129,7 +129,7 @@ static struct blob_field *blob_new_attr(struct blob *buf, int id, int payload){
 	/*if(name){
 		attr->id_len |= be32_to_cpu(BLOB_FIELD_HAS_NAME);
 		struct blob_name_hdr *hdr = (struct blob_name_hdr*)attr->data; 
-		hdr->namelen = cpu_to_be16(namelen);
+		hdr->namelen = htobe16(namelen);
 		strncpy((char *) hdr->name, (const char *)name, namelen);
 	}*/
 
@@ -175,17 +175,17 @@ static struct blob_field *blob_put_u8(struct blob *buf, uint8_t val){
 }
 
 static struct blob_field *blob_put_u16(struct blob *buf, uint16_t val){
-	val = cpu_to_be16(val);
+	val = htobe16(val);
 	return blob_put(buf, BLOB_FIELD_INT16, &val, sizeof(val));
 }
 
 static struct blob_field *blob_put_u32(struct blob *buf, uint32_t val){
-	val = cpu_to_be32(val);
+	val = htobe32(val);
 	return blob_put(buf, BLOB_FIELD_INT32, &val, sizeof(val));
 }
 
 static struct blob_field *blob_put_u64(struct blob *buf, uint64_t val){
-	val = cpu_to_be64(val);
+	val = htobe64(val);
 	return blob_put(buf, BLOB_FIELD_INT64, &val, sizeof(val));
 }
 
@@ -226,12 +226,12 @@ void blob_close_table(struct blob *buf, blob_offset_t offset){
 }
 
 static struct blob_field *blob_put_float(struct blob *buf, double value){
-	uint32_t val = cpu_to_be32(pack754_32((float)value));  
+	uint32_t val = htobe32(pack754_32((float)value));  
 	return blob_put(buf, BLOB_FIELD_FLOAT32, &val, sizeof(val)); 
 }
  
 static struct blob_field *blob_put_double(struct blob *buf, double value){
-	uint64_t val = cpu_to_be64(pack754_64(value));  
+	uint64_t val = htobe64(pack754_64(value));  
 	return blob_put(buf, BLOB_FIELD_FLOAT64, &val, sizeof(val));
 } 
 

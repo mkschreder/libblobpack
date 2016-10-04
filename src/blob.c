@@ -98,40 +98,24 @@ void blob_free(struct blob *buf){
 }
 
 static struct blob_field *blob_new_attr(struct blob *buf, int id, int payload){
-	//int namelen = 0; 
 	int attr_raw_len = sizeof(struct blob_field) + payload; 
-	/*if(name) {
-		namelen = strlen(name)+1; 
-		attr_raw_len += blob_name_hdrlen(namelen);
-	}*/
 	int attr_pad_len = attr_raw_len + (BLOB_FIELD_ALIGN - ( attr_raw_len % BLOB_FIELD_ALIGN)) % BLOB_FIELD_ALIGN; 
 
 	struct blob_field *head = blob_head(buf); 
 	int cur_len = blob_field_raw_pad_len(head); 
 	int req_len = cur_len + attr_pad_len; 
 
-	//DEBUG("head pad len %d raw len %d payload %d attr_pad_len %d\n", blob_field_pad_len(head), blob_field_raw_len(head), payload, attr_pad_len); 
 	if (!blob_resize(buf, req_len))
 		return NULL;
-	
-	//DEBUG("adding attr at offset %d - ", cur_len); 
 
-	struct blob_field *attr = (struct blob_field*)((char*)buf->buf + cur_len);
+	// cast to void* to ignore alignment warning since this is already handled above
+	struct blob_field *attr = (struct blob_field*)(void*)((char*)buf->buf + cur_len);
 	
 	blob_field_init(attr, id, attr_raw_len);
 	blob_field_fill_pad(attr);
 
-	//DEBUG("pad len %d, raw len: %d req len %d\n", blob_field_pad_len(attr), blob_field_raw_len(attr), req_len); 
-
 	// update the length of the head element to enclose the whole buffer
 	blob_field_set_raw_len(blob_head(buf), req_len); 
-
-	/*if(name){
-		attr->id_len |= be32_to_cpu(BLOB_FIELD_HAS_NAME);
-		struct blob_name_hdr *hdr = (struct blob_name_hdr*)attr->data; 
-		hdr->namelen = htobe16(namelen);
-		strncpy((char *) hdr->name, (const char *)name, namelen);
-	}*/
 
 	return attr;
 }

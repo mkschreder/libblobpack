@@ -306,7 +306,8 @@ const struct blob_field *blob_field_first_child(const struct blob_field *self){
 
 const struct blob_field *blob_field_next_child(const struct blob_field *self, const struct blob_field *child){
 	if(!child) return NULL;
-	const struct blob_field *ret = (const struct blob_field *) ((const char *) child + blob_field_raw_pad_len(child));
+	// cast to void* to supress alignment warning since blob boundaries are always aligned 	
+	const struct blob_field *ret = (const struct blob_field *)(const void*)((const char *) child + blob_field_raw_pad_len(child));
 	// check if we are still within bounds
 	size_t offset = (const char*)ret - (const char*)self; 
 	if(offset >= blob_field_raw_pad_len(self)) return NULL; 

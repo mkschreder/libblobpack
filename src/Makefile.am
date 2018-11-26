@@ -8,5 +8,5 @@ libblobpack_la_CFLAGS=$(CODE_COVERAGE_CFLAGS) -std=gnu99 -Wall -Werror -Wno-form
 -Wshadow -Wcast-align -Wchar-subscripts -Winline \
 -Wnested-externs -Wredundant-decls -Wmissing-field-initializers -Wextra \
 -Wformat=2 -Wno-format-nonliteral -Wpointer-arith -Wno-missing-braces \
--Wno-unused-parameter -Wno-unused-variable -Wno-inline
+-Wno-unused-parameter -Wno-unused-variable -Wno-inline -Wno-implicit-fallthrough
 

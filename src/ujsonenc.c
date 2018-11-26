@@ -200,6 +200,7 @@ static int Buffer_EscapeStringUnvalidated (JSONObjectEncoder *enc, const char *i
         if (enc->encodeHTMLChars)
         {
           // Fall through to \u00XX case below.
+		  __attribute__ ((fallthrough));
         }
         else
         {
@@ -408,6 +409,7 @@ static int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, cons
         if (enc->encodeHTMLChars)
         {
           // Fall through to \u00XX case 30 below.
+		  __attribute__ ((fallthrough));
         }
         else
         {

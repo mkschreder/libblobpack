@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
+#include <endian.h>
+
 
 #include "blob_field.h"
 
